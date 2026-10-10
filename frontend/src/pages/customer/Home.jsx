@@ -3,16 +3,18 @@ import { Link } from 'react-router-dom';
 import api from '../../api/client';
 import ProductCard from '../../components/customer/ProductCard';
 import {
-  Sparkles,
+  Zap,
   Flame,
   Leaf,
   ShieldCheck,
   ArrowRight,
-  Star,
-  Award,
+  Sparkles,
   ChevronRight,
-  CheckCircle2,
-  Package
+  Clock,
+  Tag,
+  Percent,
+  TrendingUp,
+  Award
 } from 'lucide-react';
 
 export default function Home() {
@@ -24,7 +26,7 @@ export default function Home() {
     const fetchHomeData = async () => {
       try {
         const [prodRes, catRes] = await Promise.all([
-          api.get('/products?limit=8'),
+          api.get('/products?limit=12'),
           api.get('/products/categories')
         ]);
         setBestsellers(prodRes.data.products || []);
@@ -38,192 +40,155 @@ export default function Home() {
     fetchHomeData();
   }, []);
 
+  const promoBanners = [
+    {
+      id: 1,
+      badge: '⚡ 10-MINUTE DISPATCH',
+      title: 'Craving Artisanal Crunch?',
+      subtitle: 'Slow-roasted jumbo fox nuts tossed in cold-pressed virgin olive oil.',
+      cta: 'Order in 10 Mins',
+      link: '/catalogue',
+      bgGradient: 'from-qcPurple-900 via-qcPurple-800 to-brand-800',
+      badgeBg: 'bg-qcYellow-400 text-charcoal-950'
+    },
+    {
+      id: 2,
+      badge: '🎉 SPECIAL OFFER',
+      title: 'Flat ₹50 OFF Your First Snack',
+      subtitle: 'Apply code ZUNO50 at checkout on orders above ₹299.',
+      cta: 'Use Code ZUNO50',
+      link: '/catalogue',
+      bgGradient: 'from-brand-800 via-qcGreen-800 to-qcGreen-700',
+      badgeBg: 'bg-white text-qcGreen-800'
+    }
+  ];
+
+  const categoryPastels = [
+    { bg: 'bg-emerald-50 hover:bg-emerald-100', border: 'border-emerald-200', text: 'text-emerald-900' },
+    { bg: 'bg-rose-50 hover:bg-rose-100', border: 'border-rose-200', text: 'text-rose-900' },
+    { bg: 'bg-amber-50 hover:bg-amber-100', border: 'border-amber-200', text: 'text-amber-900' },
+    { bg: 'bg-purple-50 hover:bg-purple-100', border: 'border-purple-200', text: 'text-purple-900' },
+    { bg: 'bg-blue-50 hover:bg-blue-100', border: 'border-blue-200', text: 'text-blue-900' }
+  ];
+
   return (
-    <div className="space-y-16 pb-20">
-      {/* Premium Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-cream-200 via-cream-100 to-cream-50 pt-12 pb-20 border-b border-cream-300">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-            {/* Left Copy */}
-            <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-50 border border-brand-200 text-brand-800 text-xs font-bold tracking-wide">
-                <Sparkles className="w-3.5 h-3.5 text-gold-500" />
-                <span>100% Slow Roasted • Never Deep Fried</span>
+    <div className="space-y-8 sm:space-y-12 pb-24">
+      {/* Zepto-Style Promotional Banners Grid */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {promoBanners.map((banner) => (
+            <div
+              key={banner.id}
+              className={`relative rounded-3xl p-6 sm:p-8 bg-gradient-to-r ${banner.bgGradient} text-white overflow-hidden shadow-card flex flex-col justify-between min-h-[190px]`}
+            >
+              <div className="relative z-10 space-y-2">
+                <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-black text-[10px] tracking-wider uppercase shadow-2xs ${banner.badgeBg}`}>
+                  {banner.badge}
+                </span>
+                <h2 className="font-sans font-black text-2xl sm:text-3xl text-white tracking-tight leading-tight">
+                  {banner.title}
+                </h2>
+                <p className="text-xs sm:text-sm text-white/80 max-w-sm">
+                  {banner.subtitle}
+                </p>
               </div>
 
-              <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-bold text-brand-950 leading-[1.15] tracking-tight">
-                Artisanal Makhana, <br className="hidden sm:inline" />
-                <span className="gold-gradient-text">Roasted to Crisp Perfection.</span>
-              </h1>
-
-              <p className="text-sm sm:text-base text-charcoal-800 leading-relaxed max-w-xl mx-auto lg:mx-0">
-                Directly harvested from the pristine wetlands of Mithila. Screened for jumbo Grade-A kernels, slow-toasted with cold-pressed olive oils, and hand-dusted with gourmet whole spices.
-              </p>
-
-              {/* CTAs */}
-              <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3.5 pt-2">
+              <div className="relative z-10 pt-4">
                 <Link
-                  to="/catalogue"
-                  className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-brand-700 hover:bg-brand-800 text-white font-bold text-xs tracking-wider uppercase shadow-luxury flex items-center justify-center gap-2 transition"
+                  to={banner.link}
+                  className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-white text-charcoal-950 font-black text-xs hover:bg-qcYellow-400 transition shadow-sm group"
                 >
-                  <span>Shop Gourmet Roasts</span>
-                  <ArrowRight className="w-4 h-4 text-gold-400" />
-                </Link>
-
-                <Link
-                  to="/catalogue?category=classic-roasted"
-                  className="w-full sm:w-auto px-7 py-3.5 rounded-full bg-white hover:bg-cream-100 text-brand-900 border border-cream-400 font-bold text-xs tracking-wider uppercase shadow-card transition text-center"
-                >
-                  Classic Himalayan Salt
+                  <span>{banner.cta}</span>
+                  <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
                 </Link>
               </div>
 
-              {/* Social Proof */}
-              <div className="pt-4 flex items-center justify-center lg:justify-start gap-6 text-xs text-gray-600">
-                <div className="flex items-center gap-1.5">
-                  <div className="flex -space-x-1.5">
-                    <span className="w-6 h-6 rounded-full bg-brand-200 border border-white flex items-center justify-center text-[10px] font-bold text-brand-800">VK</span>
-                    <span className="w-6 h-6 rounded-full bg-gold-200 border border-white flex items-center justify-center text-[10px] font-bold text-gold-800">PI</span>
-                    <span className="w-6 h-6 rounded-full bg-emerald-200 border border-white flex items-center justify-center text-[10px] font-bold text-emerald-800">AR</span>
-                  </div>
-                  <span className="font-semibold text-charcoal-900">4.9/5 Rating</span>
-                  <span className="text-gray-400">(1,200+ Reviews)</span>
-                </div>
-                <span>•</span>
-                <span className="font-semibold text-brand-800">Fresh Nitrogen Packing</span>
-              </div>
+              {/* Background ambient glow circle */}
+              <div className="absolute -right-10 -bottom-10 w-44 h-44 rounded-full bg-white/10 blur-2xl pointer-events-none" />
             </div>
-
-            {/* Right Hero Image Card */}
-            <div className="lg:col-span-5 relative flex justify-center">
-              <div className="relative w-full max-w-md aspect-square rounded-3xl overflow-hidden shadow-2xl border-4 border-white">
-                <img
-                  src="https://images.unsplash.com/photo-1599599810769-bcde5a160d32?auto=format&fit=crop&w=800&q=80"
-                  alt="Zuno Artisanal Makhana Roasted Snack"
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-charcoal-900/70 via-transparent to-transparent flex items-end p-6">
-                  <div className="text-white space-y-1">
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-gold-300 bg-white/20 px-2 py-0.5 rounded-full">
-                      Zuno Signature
-                    </span>
-                    <h3 className="font-serif text-xl font-bold">Himalayan Pink Salt</h3>
-                    <p className="text-xs text-cream-200">Crispy airy kernels dusted in pure mineral rock salt</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Floating Badge */}
-              <div className="absolute -bottom-4 -left-4 sm:left-4 bg-white/95 backdrop-blur-md p-3.5 rounded-2xl border border-cream-300 shadow-luxury flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gold-50 flex items-center justify-center text-gold-600 font-bold text-lg">
-                  10g
-                </div>
-                <div>
-                  <p className="text-[11px] font-bold text-brand-900">Plant Protein</p>
-                  <p className="text-[10px] text-gray-500">Per 100g serving</p>
-                </div>
-              </div>
-            </div>
-          </div>
+          ))}
         </div>
       </section>
 
-      {/* Trust Highlights Bar */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-6 rounded-2xl bg-white border border-cream-300 shadow-card">
-          <div className="flex items-center gap-3">
-            <Flame className="w-6 h-6 text-gold-600 shrink-0" />
-            <div>
-              <h4 className="text-xs font-bold text-brand-950">Slow Roasted</h4>
-              <p className="text-[11px] text-gray-500">Zero fried oils or trans fats</p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <Leaf className="w-6 h-6 text-brand-600 shrink-0" />
-            <div>
-              <h4 className="text-xs font-bold text-brand-950">Pure Lotus Seeds</h4>
-              <p className="text-[11px] text-gray-500">Natural ancient superfood</p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <ShieldCheck className="w-6 h-6 text-gold-600 shrink-0" />
-            <div>
-              <h4 className="text-xs font-bold text-brand-950">Non-GMO & Vegan</h4>
-              <p className="text-[11px] text-gray-500">Gluten-free clean snack</p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <Package className="w-6 h-6 text-brand-600 shrink-0" />
-            <div>
-              <h4 className="text-xs font-bold text-brand-950">Free Express Delivery</h4>
-              <p className="text-[11px] text-gray-500">On all orders above ₹499</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Categories Bar */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+      {/* Zepto-Style "Explore By Category" Squircle Rail */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <span className="text-xs uppercase font-bold tracking-widest text-gold-600">Curated Flavours</span>
-            <h2 className="font-serif text-2xl sm:text-3xl font-bold text-brand-950">Explore by Category</h2>
+            <h2 className="font-sans font-black text-lg sm:text-2xl text-charcoal-950 tracking-tight flex items-center gap-2">
+              <span>Explore Categories</span>
+            </h2>
+            <p className="text-xs text-gray-500 font-medium">Handcrafted single-origin lotus seeds</p>
           </div>
-          <Link to="/catalogue" className="text-xs font-bold text-brand-700 hover:text-brand-900 flex items-center gap-1">
+          <Link
+            to="/catalogue"
+            className="text-xs font-black text-qcPurple-700 hover:text-qcPurple-900 flex items-center gap-1"
+          >
+            <span>See All</span>
+            <ChevronRight className="w-4 h-4" />
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4">
+          {categories.map((cat, idx) => {
+            const pastel = categoryPastels[idx % categoryPastels.length];
+            return (
+              <Link
+                key={cat._id}
+                to={`/catalogue?category=${cat.slug}`}
+                className={`p-4 rounded-2xl border ${pastel.bg} ${pastel.border} transition-all duration-200 hover:-translate-y-1 hover:shadow-card text-center flex flex-col items-center justify-between space-y-2 group`}
+              >
+                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl overflow-hidden bg-white shadow-sm p-1 border border-cream-200 group-hover:scale-105 transition-transform">
+                  <img
+                    src={cat.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=200&q=80'}
+                    alt={cat.name}
+                    className="w-full h-full object-cover rounded-xl"
+                  />
+                </div>
+                <div>
+                  <h3 className={`font-sans font-extrabold text-xs sm:text-sm ${pastel.text} leading-tight`}>
+                    {cat.name}
+                  </h3>
+                  <span className="text-[10px] font-bold text-gray-500 mt-0.5 block">
+                    ⚡ 10 Mins
+                  </span>
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* Zepto-Style Product Rail 1: Delivered in 10-15 Mins (Bestsellers) */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
+        <div className="flex items-center justify-between border-b border-cream-200 pb-3">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-xl bg-qcYellow-400 flex items-center justify-center text-charcoal-950 font-black shadow-2xs">
+              <Zap className="w-4 h-4 fill-charcoal-950" />
+            </div>
+            <div>
+              <h2 className="font-sans font-black text-lg sm:text-2xl text-charcoal-950 tracking-tight flex items-center gap-2">
+                <span>Delivered in 10-15 Mins</span>
+              </h2>
+              <p className="text-xs text-gray-500 font-medium">Bestselling roasts freshly packed from our dark store</p>
+            </div>
+          </div>
+          <Link
+            to="/catalogue"
+            className="text-xs font-black text-qcPurple-700 hover:text-qcPurple-900 flex items-center gap-1"
+          >
             <span>View All</span>
             <ChevronRight className="w-4 h-4" />
           </Link>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
-          {categories.map((cat) => (
-            <Link
-              key={cat._id}
-              to={`/catalogue?category=${cat.slug}`}
-              className="group p-4 rounded-2xl bg-white border border-cream-300 hover:border-gold-400 hover:shadow-luxury transition-all text-center space-y-3"
-            >
-              <div className="w-16 h-16 mx-auto rounded-full overflow-hidden bg-cream-200 border-2 border-white shadow-sm group-hover:scale-105 transition">
-                <img
-                  src={cat.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=200&q=80'}
-                  alt={cat.name}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div>
-                <h3 className="text-xs font-bold text-brand-900 group-hover:text-brand-700 transition">
-                  {cat.name}
-                </h3>
-                <p className="text-[10px] text-gray-500 line-clamp-1 mt-0.5">{cat.description}</p>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      {/* Featured Bestsellers Grid */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <span className="text-xs uppercase font-bold tracking-widest text-gold-600">Handcrafted Selection</span>
-            <h2 className="font-serif text-2xl sm:text-3xl font-bold text-brand-950">Bestselling Gourmet Makhana</h2>
-          </div>
-          <Link to="/catalogue" className="text-xs font-bold text-brand-700 hover:text-brand-900 flex items-center gap-1">
-            <span>Browse Catalogue</span>
-            <ChevronRight className="w-4 h-4" />
-          </Link>
-        </div>
-
         {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="h-80 bg-cream-200/60 rounded-2xl animate-pulse" />
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+            {[1, 2, 3, 4].map((n) => (
+              <div key={n} className="h-72 bg-cream-200/70 rounded-2xl animate-pulse" />
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
             {bestsellers.slice(0, 8).map((product) => (
               <ProductCard key={product._id} product={product} />
             ))}
@@ -231,71 +196,47 @@ export default function Home() {
         )}
       </section>
 
-      {/* Promotional Banner: Welcome Discount */}
+      {/* Quick Value & Quality Guarantees Bar (Zepto Style) */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="rounded-3xl bg-gradient-to-r from-brand-900 via-brand-800 to-brand-900 text-cream-100 p-8 sm:p-12 relative overflow-hidden shadow-luxury border border-gold-500/20">
-          <div className="relative z-10 max-w-xl space-y-4">
-            <span className="text-xs font-bold uppercase tracking-widest text-gold-400 bg-white/10 px-3 py-1 rounded-full border border-gold-400/20">
-              Welcome Snacker Offer
-            </span>
-            <h2 className="font-serif text-3xl sm:text-4xl font-bold text-white">
-              Flat ₹50 OFF Your First Order
-            </h2>
-            <p className="text-xs sm:text-sm text-cream-200 leading-relaxed">
-              Experience the crunch of artisanal roasted makhana. Apply coupon code <strong className="text-gold-300 font-mono text-base px-2 py-0.5 rounded bg-white/15 border border-gold-400/40">FIRST50</strong> at checkout on orders above ₹299.
-            </p>
-            <div className="pt-2">
-              <Link
-                to="/catalogue"
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gold-500 hover:bg-gold-600 text-charcoal-900 font-bold text-xs uppercase tracking-wider transition shadow-lg"
-              >
-                <span>Claim Offer Now</span>
-                <ArrowRight className="w-4 h-4" />
-              </Link>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 p-5 sm:p-6 rounded-3xl bg-cream-50 border border-cream-300">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-qcYellow-100 flex items-center justify-center text-qcYellow-700 shrink-0">
+              <Zap className="w-5 h-5 fill-qcYellow-500" />
+            </div>
+            <div>
+              <h3 className="font-extrabold text-xs text-charcoal-950">10-Min Delivery</h3>
+              <p className="text-[11px] text-gray-500 font-medium">Instant hyper-local dispatch</p>
             </div>
           </div>
-        </div>
-      </section>
 
-      {/* Why Makhana: Health Superfood Comparison */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-        <div className="text-center max-w-2xl mx-auto space-y-2">
-          <span className="text-xs uppercase font-bold tracking-widest text-gold-600">Nutritional Mastery</span>
-          <h2 className="font-serif text-3xl font-bold text-brand-950">Why Switch to Zuno Makhana?</h2>
-          <p className="text-xs sm:text-sm text-gray-600">
-            Compare the nutritional profile of our slow-roasted fox nuts against conventional deep-fried snacks.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="p-6 rounded-2xl bg-white border border-cream-300 shadow-card space-y-3">
-            <div className="w-10 h-10 rounded-xl bg-brand-50 flex items-center justify-center text-brand-700">
-              <CheckCircle2 className="w-5 h-5" />
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-emerald-100 flex items-center justify-center text-emerald-700 shrink-0">
+              <Flame className="w-5 h-5 text-emerald-700" />
             </div>
-            <h3 className="font-serif text-base font-bold text-brand-900">Zero Trans Fats</h3>
-            <p className="text-xs text-gray-500 leading-relaxed">
-              Unlike deep-fried potato chips that soak in 35g of reheated palm oils, Zuno makhana contains under 6g of healthy cold-pressed fats.
-            </p>
+            <div>
+              <h3 className="font-extrabold text-xs text-charcoal-950">Slow Roasted</h3>
+              <p className="text-[11px] text-gray-500 font-medium">0% deep fried or palm oils</p>
+            </div>
           </div>
 
-          <div className="p-6 rounded-2xl bg-white border border-cream-300 shadow-card space-y-3">
-            <div className="w-10 h-10 rounded-xl bg-gold-50 flex items-center justify-center text-gold-600">
-              <Award className="w-5 h-5" />
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-purple-100 flex items-center justify-center text-purple-700 shrink-0">
+              <Leaf className="w-5 h-5 text-purple-700" />
             </div>
-            <h3 className="font-serif text-base font-bold text-brand-900">High Biological Protein</h3>
-            <p className="text-xs text-gray-500 leading-relaxed">
-              Supplying ~9.8g of plant-based protein per 100g, makhana provides sustained satiety without post-snack lethargy.
-            </p>
+            <div>
+              <h3 className="font-extrabold text-xs text-charcoal-950">Pure Mithila Lotus</h3>
+              <p className="text-[11px] text-gray-500 font-medium">Single-origin jumbo kernels</p>
+            </div>
           </div>
 
-          <div className="p-6 rounded-2xl bg-white border border-cream-300 shadow-card space-y-3">
-            <div className="w-10 h-10 rounded-xl bg-brand-50 flex items-center justify-center text-brand-700">
-              <Leaf className="w-5 h-5" />
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-blue-100 flex items-center justify-center text-blue-700 shrink-0">
+              <ShieldCheck className="w-5 h-5 text-blue-700" />
             </div>
-            <h3 className="font-serif text-base font-bold text-brand-900">Low Glycemic Index</h3>
-            <p className="text-xs text-gray-500 leading-relaxed">
-              Releases energy slowly into the bloodstream, making it a doctor-recommended superfood for mindful weight and sugar management.
-            </p>
+            <div>
+              <h3 className="font-extrabold text-xs text-charcoal-950">FREE Shipping ₹499+</h3>
+              <p className="text-[11px] text-gray-500 font-medium">No hidden handling fees</p>
+            </div>
           </div>
         </div>
       </section>

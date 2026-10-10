@@ -24,7 +24,7 @@ export const CartProvider = ({ children }) => {
     }
   }, [cartItems]);
 
-  const addToCart = (product, variant, quantity = 1) => {
+  const addToCart = (product, variant, quantity = 1, openDrawer = false) => {
     setCartItems((prev) => {
       const existingIndex = prev.findIndex((item) => item.variant.sku === variant.sku);
       if (existingIndex > -1) {
@@ -56,8 +56,10 @@ export const CartProvider = ({ children }) => {
       ];
     });
 
-    info(`Added ${variant.flavor} (${variant.packSize}) to your bag`);
-    setIsDrawerOpen(true);
+    info(`Added ${variant.flavor} (${variant.packSize})`);
+    if (openDrawer) {
+      setIsDrawerOpen(true);
+    }
   };
 
   const updateQuantity = (variantSku, newQuantity) => {

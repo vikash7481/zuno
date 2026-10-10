@@ -9,6 +9,7 @@ import RoleSwitcherBanner from './components/common/RoleSwitcherBanner';
 import Navbar from './components/common/Navbar';
 import Footer from './components/common/Footer';
 import CartDrawer from './components/customer/CartDrawer';
+import FloatingCartBar from './components/customer/FloatingCartBar';
 
 // Customer Pages
 import Home from './pages/customer/Home';
@@ -64,9 +65,10 @@ function CustomerLayout({ children }) {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-cream-100 text-charcoal-900">
+    <div className="min-h-screen flex flex-col bg-cream-100 text-charcoal-900 pb-16">
       <Navbar />
       <CartDrawer />
+      <FloatingCartBar />
       <main className="flex-1">{children}</main>
       <Footer />
     </div>

@@ -42,6 +42,28 @@ export default {
         charcoal: {
           800: '#1E2320',
           900: '#121513',
+          950: '#0A0D0B',
+        },
+        qcGreen: {
+          50: '#F0FDF4',
+          100: '#DCFCE7',
+          500: '#22C55E',
+          600: '#16A34A',
+          700: '#0C831F', // Signature Zepto Add Button Green
+          800: '#0A6C19',
+        },
+        qcPurple: {
+          50: '#FAF5FF',
+          100: '#F3E8FF',
+          200: '#E9D5FF',
+          600: '#892CDC',
+          700: '#52057B',
+          800: '#3E006B',
+          900: '#2E0249',
+        },
+        qcYellow: {
+          400: '#FACC15',
+          500: '#EAB308',
         }
       },
       fontFamily: {

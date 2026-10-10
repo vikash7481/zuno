@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
-import { Star, ShoppingBag, Check } from 'lucide-react';
+import { Star, Zap, Clock, Plus, Minus } from 'lucide-react';
 
 export default function ProductCard({ product }) {
-  const { addToCart } = useCart();
+  const { cartItems, addToCart, updateQuantity } = useCart();
   const [selectedVariantIndex, setSelectedVariantIndex] = useState(0);
-  const [isAddedAnim, setIsAddedAnim] = useState(false);
 
   const variants = product.variants || [];
   const currentVariant = variants[selectedVariantIndex] || variants[0] || {};
@@ -17,86 +16,101 @@ export default function ProductCard({ product }) {
 
   const availableStock = currentVariant.availableStock !== undefined ? currentVariant.availableStock : 10;
   const isOutOfStock = availableStock <= 0;
-  const isLowStock = availableStock > 0 && availableStock <= 15;
 
-  const handleQuickAdd = (e) => {
+  // Check if this specific variant is already in cart
+  const inCartItem = cartItems.find((item) => item.variant.sku === currentVariant.sku);
+  const cartQuantity = inCartItem ? inCartItem.quantity : 0;
+
+  const handleAdd = (e) => {
     e.preventDefault();
     e.stopPropagation();
     if (isOutOfStock) return;
-    addToCart(product, currentVariant, 1);
-    setIsAddedAnim(true);
-    setTimeout(() => setIsAddedAnim(false), 1200);
+    addToCart(product, currentVariant, 1, false);
+  };
+
+  const handleIncrement = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    updateQuantity(currentVariant.sku, cartQuantity + 1);
+  };
+
+  const handleDecrement = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    updateQuantity(currentVariant.sku, cartQuantity - 1);
   };
 
   return (
-    <div className="group bg-white rounded-2xl border border-cream-300 overflow-hidden shadow-card hover:shadow-luxury hover:border-gold-300 transition-all duration-300 flex flex-col h-full">
-      {/* Product Image & Badges */}
-      <Link to={`/product/${product.slug}`} className="relative block aspect-square overflow-hidden bg-cream-200">
-        <img
-          src={product.images?.[0] || 'https://images.unsplash.com/photo-1599599810769-bcde5a160d32?auto=format&fit=crop&w=600&q=80'}
-          alt={product.name}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-        />
+    <div className="group relative bg-white rounded-2xl border border-cream-300 hover:border-qcGreen-500 hover:shadow-luxury transition-all duration-300 flex flex-col justify-between overflow-hidden p-3 h-full">
+      {/* Top Image Container */}
+      <div className="relative block aspect-square rounded-xl overflow-hidden bg-cream-100 mb-2.5">
+        <Link to={`/product/${product.slug}`} className="block w-full h-full">
+          <img
+            src={product.images?.[0] || 'https://images.unsplash.com/photo-1599599810769-bcde5a160d32?auto=format&fit=crop&w=600&q=80'}
+            alt={product.name}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            loading="lazy"
+          />
+        </Link>
 
-        {/* Discount Badge */}
-        {discountPercent > 0 && (
-          <span className="absolute top-3 left-3 bg-brand-700 text-gold-300 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider shadow-sm">
-            {discountPercent}% OFF
+        {/* Floating Quick Commerce Badges */}
+        <div className="absolute top-2 left-2 z-10 flex flex-col gap-1 pointer-events-none">
+          {discountPercent > 0 && (
+            <span className="px-1.5 py-0.5 rounded-md bg-rose-600 text-white text-[10px] font-black uppercase tracking-wider shadow-sm">
+              {discountPercent}% OFF
+            </span>
+          )}
+          <span className="px-2 py-0.5 rounded-full bg-white/95 backdrop-blur-md text-charcoal-900 border border-cream-200 text-[10px] font-black flex items-center gap-1 shadow-sm">
+            <Zap className="w-2.5 h-2.5 fill-qcYellow-400 text-qcYellow-500" />
+            <span>10 MINS</span>
           </span>
-        )}
+        </div>
 
-        {/* Stock Badge */}
+        {/* Stock Alert */}
         {isOutOfStock ? (
-          <span className="absolute top-3 right-3 bg-rose-600 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+          <span className="absolute top-2 right-2 bg-charcoal-900/90 text-white text-[10px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider">
             Sold Out
           </span>
-        ) : isLowStock ? (
-          <span className="absolute top-3 right-3 bg-amber-500 text-charcoal-900 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-            Only {availableStock} Left
-          </span>
         ) : null}
-      </Link>
+      </div>
 
-      {/* Content */}
-      <div className="p-4 flex-1 flex flex-col justify-between space-y-3">
+      {/* Content Section */}
+      <div className="flex-1 flex flex-col justify-between space-y-2">
         <div>
-          {/* Flavor Pill & Rating */}
-          <div className="flex items-center justify-between text-xs mb-1.5">
-            <span className="text-[11px] font-semibold text-brand-700 uppercase tracking-wider">
-              {currentVariant.flavor || product.category?.name || 'Artisanal'}
+          {/* Fast Delivery & Rating Indicator */}
+          <div className="flex items-center justify-between text-[11px] mb-1">
+            <span className="flex items-center gap-1 font-bold text-gray-500 tracking-wide">
+              <Clock className="w-3 h-3 text-qcGreen-700" />
+              <span>10-15 MINS</span>
             </span>
-            <div className="flex items-center gap-1 text-gold-600 font-bold text-[11px]">
-              <Star className="w-3.5 h-3.5 fill-gold-500 text-gold-500" />
-              <span>{product.averageRating || '4.8'}</span>
-              <span className="text-gray-400 font-normal">({product.reviewCount || 20})</span>
+            <div className="flex items-center gap-1 font-bold text-charcoal-800 bg-cream-100 px-1.5 py-0.5 rounded-md">
+              <Star className="w-3 h-3 fill-gold-500 text-gold-500" />
+              <span>{product.averageRating || '4.9'}</span>
             </div>
           </div>
 
-          {/* Title */}
-          <Link to={`/product/${product.slug}`}>
-            <h3 className="font-serif text-sm font-bold text-brand-950 group-hover:text-brand-700 transition line-clamp-1">
+          {/* Product Name */}
+          <Link to={`/product/${product.slug}`} className="block">
+            <h3 className="font-sans text-xs sm:text-sm font-bold text-charcoal-950 group-hover:text-qcGreen-700 transition line-clamp-2 leading-snug">
               {product.name}
             </h3>
           </Link>
 
-          <p className="text-xs text-gray-500 line-clamp-2 mt-1 leading-relaxed">
-            {product.shortDescription || product.description}
-          </p>
-
-          {/* Variant Selector Pills */}
+          {/* Pack Variant Pills (Zepto style) */}
           {variants.length > 1 && (
-            <div className="flex items-center gap-1.5 mt-2.5 flex-wrap">
+            <div className="flex items-center gap-1.5 mt-2 flex-wrap">
               {variants.map((v, idx) => (
                 <button
                   key={v.sku}
                   onClick={(e) => {
                     e.preventDefault();
+                    e.stopPropagation();
                     setSelectedVariantIndex(idx);
                   }}
                   className={`text-[10px] font-bold px-2 py-0.5 rounded-md border transition ${
                     selectedVariantIndex === idx
-                      ? 'bg-brand-700 text-white border-brand-700'
-                      : 'bg-cream-100 text-charcoal-800 border-cream-300 hover:border-brand-500'
+                      ? 'bg-qcPurple-50 text-qcPurple-800 border-qcPurple-600 font-extrabold shadow-xs'
+                      : 'bg-white text-gray-600 border-cream-300 hover:border-gray-400'
                   }`}
                 >
                   {v.packSize}
@@ -106,45 +120,59 @@ export default function ProductCard({ product }) {
           )}
         </div>
 
-        {/* Pricing & Add to Cart */}
-        <div className="pt-2 border-t border-cream-200 flex items-center justify-between">
+        {/* Price & Zepto-Style Interactive ADD / Stepper Button */}
+        <div className="pt-2 border-t border-cream-200/80 flex items-center justify-between gap-2 mt-auto">
           <div>
             <div className="flex items-baseline gap-1.5">
-              <span className="font-serif text-base font-bold text-brand-900">
+              <span className="font-sans text-sm sm:text-base font-extrabold text-charcoal-950">
                 ₹{currentVariant.sellingPrice || 129}
               </span>
               {currentVariant.mrp > currentVariant.sellingPrice && (
-                <span className="text-xs text-gray-400 line-through">
+                <span className="text-[11px] text-gray-400 line-through">
                   ₹{currentVariant.mrp}
                 </span>
               )}
             </div>
-            <span className="text-[10px] text-gray-500">
-              Inclusive of GST
+            <span className="text-[9px] text-gray-500 font-medium block">
+              {currentVariant.weightGrams ? `${currentVariant.weightGrams}g` : currentVariant.packSize}
             </span>
           </div>
 
-          <button
-            onClick={handleQuickAdd}
-            disabled={isOutOfStock}
-            className={`py-2 px-3.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm ${
-              isOutOfStock
-                ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                : isAddedAnim
-                ? 'bg-brand-600 text-white'
-                : 'bg-brand-700 hover:bg-brand-800 text-white'
-            }`}
-          >
-            {isAddedAnim ? (
-              <>
-                <Check className="w-3.5 h-3.5" /> Added
-              </>
-            ) : (
-              <>
-                <ShoppingBag className="w-3.5 h-3.5 text-gold-300" /> Add
-              </>
-            )}
-          </button>
+          {/* Zepto Stepper or ADD Button */}
+          {cartQuantity > 0 ? (
+            <div className="flex items-center rounded-lg bg-qcGreen-700 text-white shadow-sm overflow-hidden h-8">
+              <button
+                onClick={handleDecrement}
+                className="w-7 h-full hover:bg-qcGreen-800 active:bg-qcGreen-900 transition flex items-center justify-center font-bold"
+                title="Decrease quantity"
+              >
+                <Minus className="w-3 h-3" />
+              </button>
+              <span className="px-2 font-black text-xs text-white min-w-[20px] text-center">
+                {cartQuantity}
+              </span>
+              <button
+                onClick={handleIncrement}
+                className="w-7 h-full hover:bg-qcGreen-800 active:bg-qcGreen-900 transition flex items-center justify-center font-bold"
+                title="Increase quantity"
+              >
+                <Plus className="w-3 h-3" />
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={handleAdd}
+              disabled={isOutOfStock}
+              className={`h-8 px-4 rounded-lg font-extrabold text-xs tracking-wider transition uppercase flex items-center justify-center gap-1 shadow-xs ${
+                isOutOfStock
+                  ? 'bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed'
+                  : 'bg-white hover:bg-qcGreen-700 text-qcGreen-700 hover:text-white border-2 border-qcGreen-700 active:scale-95'
+              }`}
+            >
+              <span>ADD</span>
+              <Plus className="w-3 h-3 stroke-[3]" />
+            </button>
+          )}
         </div>
       </div>
     </div>

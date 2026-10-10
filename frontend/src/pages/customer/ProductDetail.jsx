@@ -281,14 +281,14 @@ export default function ProductDetail() {
                 <button
                   key={v.sku}
                   onClick={() => setSelectedVariantIndex(idx)}
-                  className={`p-3 rounded-xl border text-left transition flex flex-col justify-between ${
+                  className={`p-3 rounded-2xl border text-left transition flex flex-col justify-between ${
                     selectedVariantIndex === idx
-                      ? 'border-brand-700 bg-brand-50/50 shadow-sm ring-1 ring-brand-700'
-                      : 'border-cream-300 bg-white hover:border-brand-400'
+                      ? 'border-qcPurple-700 bg-qcPurple-50/60 shadow-xs ring-2 ring-qcPurple-600'
+                      : 'border-cream-300 bg-white hover:border-qcPurple-400'
                   }`}
                 >
-                  <span className="text-xs font-bold text-brand-900">{v.packSize}</span>
-                  <span className="text-xs font-semibold text-brand-700 mt-1">₹{v.sellingPrice}</span>
+                  <span className="text-xs font-black text-charcoal-950">{v.packSize}</span>
+                  <span className="text-xs font-extrabold text-qcGreen-700 mt-1">₹{v.sellingPrice}</span>
                 </button>
               ))}
             </div>
@@ -296,18 +296,18 @@ export default function ProductDetail() {
 
           {/* Quantity & Action Buttons */}
           <div className="space-y-3 pt-2">
-            <div className="flex items-center gap-4">
-              <div className="flex items-center border border-cream-400 rounded-xl bg-white overflow-hidden h-12 shadow-sm">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center border border-cream-400 rounded-2xl bg-white overflow-hidden h-12 shadow-xs">
                 <button
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  className="px-3.5 hover:bg-cream-100 text-gray-600 transition"
+                  className="px-4 hover:bg-cream-100 text-gray-700 transition font-bold"
                 >
                   <Minus className="w-4 h-4" />
                 </button>
-                <span className="px-4 text-sm font-bold text-brand-900">{quantity}</span>
+                <span className="px-4 text-sm font-black text-charcoal-950">{quantity}</span>
                 <button
                   onClick={() => setQuantity(quantity + 1)}
-                  className="px-3.5 hover:bg-cream-100 text-gray-600 transition"
+                  className="px-4 hover:bg-cream-100 text-gray-700 transition font-bold"
                 >
                   <Plus className="w-4 h-4" />
                 </button>
@@ -316,9 +316,9 @@ export default function ProductDetail() {
               <button
                 onClick={handleAddToCart}
                 disabled={isOutOfStock}
-                className="flex-1 h-12 rounded-xl bg-brand-700 hover:bg-brand-800 disabled:opacity-50 text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-luxury transition"
+                className="flex-1 h-12 rounded-2xl bg-qcGreen-700 hover:bg-qcGreen-800 active:scale-[0.99] disabled:opacity-50 text-white font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-luxury transition"
               >
-                <ShoppingBag className="w-4 h-4 text-gold-300" />
+                <ShoppingBag className="w-4 h-4 text-qcYellow-300" />
                 <span>Add to Bag</span>
               </button>
             </div>
@@ -326,10 +326,10 @@ export default function ProductDetail() {
             <button
               onClick={handleBuyNow}
               disabled={isOutOfStock}
-              className="w-full h-12 rounded-xl bg-gold-500 hover:bg-gold-600 disabled:opacity-50 text-charcoal-900 font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-md transition"
+              className="w-full h-12 rounded-2xl bg-qcPurple-800 hover:bg-qcPurple-900 active:scale-[0.99] disabled:opacity-50 text-white font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-md transition"
             >
-              <Zap className="w-4 h-4" />
-              <span>Buy Now • Express Checkout</span>
+              <Zap className="w-4 h-4 fill-qcYellow-400 text-qcYellow-400" />
+              <span>⚡ Buy Now • 10-Min Dispatch</span>
             </button>
           </div>
 
