@@ -1,0 +1,35 @@
+# Dependencies
+node_modules/
+*/node_modules/
+
+# Secrets and local environment files
+.env
+.env.local
+.env.*.local
+backend/.env
+frontend/.env
+*.env
+
+# Production build outputs
+dist/
+*/dist/
+build/
+*/build/
+
+# Logs & Debugging
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS & Editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Temp folders
+temp/
+.temp/
+D:/temp
