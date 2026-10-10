@@ -72,6 +72,22 @@ const apiLimiter = rateLimit({
 });
 app.use('/api', apiLimiter);
 
+// Root entrypoint
+app.get('/', (req, res) => {
+  res.json({
+    success: true,
+    message: 'Zuno Enterprise Artisanal Fox Nuts Platform API is running live',
+    version: '1.0.0',
+    status: 'healthy',
+    database: 'MongoDB Atlas Connected',
+    endpoints: {
+      health: '/api/health',
+      products: '/api/products',
+      categories: '/api/products/categories'
+    }
+  });
+});
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({
