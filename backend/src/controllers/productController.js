@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import Product from '../models/Product.js';
 import Category from '../models/Category.js';
 import InventoryItem from '../models/InventoryItem.js';
@@ -128,11 +129,14 @@ export const getProductBySlug = async (req, res, next) => {
     }));
 
     // Find related products in same category
-    const relatedProducts = await Product.find({
-      category: product.category._id,
-      _id: { $ne: product._id },
-      isPublished: true
-    }).limit(4).lean();
+    const categoryId = product.category?._id || product.category;
+    const relatedProducts = categoryId
+      ? await Product.find({
+          category: categoryId,
+          _id: { $ne: product._id },
+          isPublished: true
+        }).limit(4).lean()
+      : [];
 
     res.json({ success: true, product, relatedProducts });
   } catch (error) {
