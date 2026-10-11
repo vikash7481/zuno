@@ -105,3 +105,24 @@
 .animate-logo-pulse {
   animation: logoPulse 2.2s ease-in-out infinite;
 }
+
+/* Mobile Safe Area & Horizontal Scroll helpers */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Prevent accidental mobile body horizontal overflow */
+html, body {
+  max-width: 100%;
+  overflow-x: hidden;
+}

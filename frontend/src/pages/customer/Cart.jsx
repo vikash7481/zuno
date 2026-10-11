@@ -81,60 +81,77 @@ export default function Cart() {
           </div>
 
           <div className="bg-white rounded-3xl border border-cream-300 shadow-sm divide-y divide-cream-200 overflow-hidden">
-            {cartItems.map((item) => (
-              <div key={item.variantSku} className="p-4 sm:p-5 flex items-center gap-4">
-                <img
-                  src={item.image || 'https://images.unsplash.com/photo-1599490659213-e2b9527bd087?auto=format&fit=crop&w=400&q=80'}
-                  alt={item.name}
-                  className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover bg-cream-100 border border-cream-200 shrink-0"
-                />
+            {cartItems.map((item) => {
+              const sku = item.variant?.sku || item.variantSku;
+              const name = item.product?.name || item.name;
+              const image = item.product?.image || item.image;
+              const packSize = item.variant?.packSize || item.packSize;
+              const flavor = item.variant?.flavor || item.flavor;
+              const price = item.variant?.sellingPrice || item.price;
+              const mrp = item.variant?.mrp || item.mrp;
 
-                <div className="flex-1 min-w-0 space-y-1">
-                  <h3 className="font-bold text-xs sm:text-sm text-charcoal-900 truncate">
-                    {item.name}
-                  </h3>
-                  <p className="text-[11px] text-gray-500 font-medium">
-                    Pack: {item.packSize} • {item.flavor}
-                  </p>
-                  <p className="font-mono font-bold text-xs text-charcoal-900 sm:hidden">
-                    ₹{item.price} each
-                  </p>
-                </div>
+              return (
+                <div key={sku} className="p-4 sm:p-5 flex items-center gap-4">
+                  <img
+                    src={image || 'https://images.unsplash.com/photo-1599490659213-e2b9527bd087?auto=format&fit=crop&w=400&q=80'}
+                    alt={name}
+                    className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover bg-cream-100 border border-cream-200 shrink-0"
+                  />
 
-                <div className="flex items-center gap-2 border border-cream-300 rounded-xl bg-cream-50 p-1">
+                  <div className="flex-1 min-w-0 space-y-1">
+                    <h3 className="font-bold text-xs sm:text-sm text-charcoal-900 truncate">
+                      {name}
+                    </h3>
+                    <p className="text-[11px] text-gray-500 font-medium">
+                      Pack: {packSize} {flavor ? `• ${flavor}` : ''}
+                    </p>
+                    <div className="flex items-baseline gap-1.5 sm:hidden">
+                      <span className="font-mono font-bold text-xs text-charcoal-900">
+                        ₹{price}
+                      </span>
+                      {mrp > price && (
+                        <span className="font-mono text-[10px] text-gray-400 line-through">
+                          ₹{mrp}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 border border-cream-300 rounded-xl bg-cream-50 p-1">
+                    <button
+                      onClick={() => updateQuantity(sku, item.quantity - 1)}
+                      className="w-6 h-6 rounded-lg bg-white hover:bg-cream-200 flex items-center justify-center text-charcoal-800 transition"
+                    >
+                      <Minus className="w-3 h-3" />
+                    </button>
+                    <span className="w-6 text-center font-bold text-xs">{item.quantity}</span>
+                    <button
+                      onClick={() => updateQuantity(sku, item.quantity + 1)}
+                      className="w-6 h-6 rounded-lg bg-white hover:bg-cream-200 flex items-center justify-center text-charcoal-800 transition"
+                    >
+                      <Plus className="w-3 h-3" />
+                    </button>
+                  </div>
+
+                  <div className="text-right hidden sm:block min-w-[70px]">
+                    <p className="font-mono font-black text-sm text-charcoal-900">
+                      ₹{price * item.quantity}
+                    </p>
+                    <p className="text-[10px] text-gray-400">
+                      ₹{price} each
+                    </p>
+                  </div>
+
                   <button
-                    onClick={() => updateQuantity(item.variantSku, item.quantity - 1)}
-                    className="w-6 h-6 rounded-lg bg-white hover:bg-cream-200 flex items-center justify-center text-charcoal-800 transition"
+                    onClick={() => removeFromCart(sku)}
+                    className="p-2 text-gray-400 hover:text-rose-600 transition rounded-lg hover:bg-rose-50"
+                    title="Remove item"
                   >
-                    <Minus className="w-3 h-3" />
-                  </button>
-                  <span className="w-6 text-center font-bold text-xs">{item.quantity}</span>
-                  <button
-                    onClick={() => updateQuantity(item.variantSku, item.quantity + 1)}
-                    className="w-6 h-6 rounded-lg bg-white hover:bg-cream-200 flex items-center justify-center text-charcoal-800 transition"
-                  >
-                    <Plus className="w-3 h-3" />
+                    <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
-
-                <div className="text-right hidden sm:block min-w-[70px]">
-                  <p className="font-mono font-black text-sm text-charcoal-900">
-                    ₹{item.price * item.quantity}
-                  </p>
-                  <p className="text-[10px] text-gray-400">
-                    ₹{item.price} each
-                  </p>
-                </div>
-
-                <button
-                  onClick={() => removeFromCart(item.variantSku)}
-                  className="p-2 text-gray-400 hover:text-rose-600 transition rounded-lg hover:bg-rose-50"
-                  title="Remove item"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 

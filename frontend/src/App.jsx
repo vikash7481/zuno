@@ -9,6 +9,7 @@ import Navbar from './components/common/Navbar';
 import Footer from './components/common/Footer';
 import CartDrawer from './components/customer/CartDrawer';
 import FloatingCartBar from './components/customer/FloatingCartBar';
+import BottomNav from './components/common/BottomNav';
 
 // Customer Storefront Pages (Zuno)
 import Home from './pages/customer/Home';
@@ -116,12 +117,13 @@ function CustomerLayout({ children }) {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-cream-100 text-charcoal-900 pb-16">
+    <div className="min-h-screen flex flex-col bg-cream-100 text-charcoal-900 pb-20 md:pb-16">
       <AppIntroSplash />
       <Navbar />
       <CartDrawer />
       <FloatingCartBar />
       <main className="flex-1">{children}</main>
+      <BottomNav />
       <Footer />
     </div>
   );

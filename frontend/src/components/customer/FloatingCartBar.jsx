@@ -10,7 +10,7 @@ export default function FloatingCartBar() {
   return (
     <aside
       aria-label="Active Cart Summary"
-      className="fixed bottom-4 left-0 right-0 z-40 px-4 sm:px-6 pointer-events-none animate-in fade-in slide-in-from-bottom-5 duration-200"
+      className="fixed bottom-18 sm:bottom-4 left-0 right-0 z-35 px-4 sm:px-6 pointer-events-none animate-in fade-in slide-in-from-bottom-5 duration-200"
     >
       <div className="max-w-2xl mx-auto pointer-events-auto">
         <button

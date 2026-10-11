@@ -7,8 +7,6 @@ import {
   Search,
   User,
   Heart,
-  Menu,
-  X,
   ChevronDown,
   LogOut,
   PackageCheck,
@@ -33,37 +31,46 @@ export default function Navbar() {
   const location = useLocation();
 
   const [searchQuery, setSearchQuery] = useState('');
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState(() => {
     return localStorage.getItem('zuno_delivery_location') || 'Bengaluru - 560001';
   });
 
-  // Active Festive Theme State (Authoritative Server Source of Truth)
+  // Dynamic Theme State
   const [activeTheme, setActiveTheme] = useState(null);
 
+  // Dynamic Categories from Backend
+  const [categories, setCategories] = useState([]);
+
   useEffect(() => {
-    const fetchActiveTheme = async () => {
+    const fetchHeaderData = async () => {
       try {
-        const res = await api.get('/themes/active');
-        if (res.data?.success && res.data.theme) {
-          setActiveTheme(res.data.theme);
+        const [themeRes, catRes] = await Promise.allSettled([
+          api.get('/themes/active'),
+          api.get('/products/categories')
+        ]);
+
+        if (themeRes.status === 'fulfilled' && themeRes.value.data?.success) {
+          setActiveTheme(themeRes.value.data.theme);
+        }
+
+        if (catRes.status === 'fulfilled' && catRes.value.data?.categories) {
+          setCategories(catRes.value.data.categories);
         }
       } catch {
-        // Fallback default
+        // Fallback gracefully
       }
     };
 
-    fetchActiveTheme();
+    fetchHeaderData();
 
-    // Poll every 60 seconds for scheduled campaign activation / expiry
-    const timer = setInterval(fetchActiveTheme, 60000);
+    // Poll every 60s for scheduled theme transitions
+    const timer = setInterval(fetchHeaderData, 60000);
 
-    // Also listen to custom broadcast or storage event when admin changes theme
     const handleStorageChange = (e) => {
       if (e.key === 'zuno_active_theme_sync') {
-        fetchActiveTheme();
+        fetchHeaderData();
       }
     };
     window.addEventListener('storage', handleStorageChange);
@@ -74,99 +81,114 @@ export default function Navbar() {
     };
   }, []);
 
-  // Animated search placeholder rotation (Zepto-style)
-  const searchSuggestions = [
-    "Search 'Himalayan Pink Salt'...",
-    "Search 'Spicy Peri Peri'...",
-    "Search 'Cream & Garden Onion'...",
-    "Search 'Jaggery Caramel Makhana'...",
-    "Search 'Raw Jumbo Kernels'..."
+  // Animated search placeholder rotation
+  const searchPlaceholders = [
+    'Search makhana, flavours & combos',
+    'Search Himalayan Pink Salt...',
+    'Search Spicy Peri Peri...',
+    'Search Jaggery Caramel Makhana...',
+    'Search Raw Jumbo Kernels...'
   ];
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setPlaceholderIndex((prev) => (prev + 1) % searchSuggestions.length);
-    }, 2800);
+      setPlaceholderIndex((prev) => (prev + 1) % searchPlaceholders.length);
+    }, 3200);
     return () => clearInterval(timer);
-  }, [searchSuggestions.length]);
+  }, [searchPlaceholders.length]);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
       navigate(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
-      setIsMobileMenuOpen(false);
     }
   };
 
+  // Build categories list (Real DB categories or fallback)
   const navCategories = [
     { name: 'All Makhana', path: '/products' },
-    { name: '⚡ Classic Roasted', path: '/products?category=classic-roasted' },
-    { name: '🌶️ Gourmet Spiced', path: '/products?category=gourmet-flavoured' },
-    { name: '🍯 Sweet Delights', path: '/products?category=sweet-delights' },
-    { name: '🌿 Raw Superfood', path: '/products?category=raw-superfood' },
-    { name: '🎁 Family Packs', path: '/products?category=combos-and-family-packs' }
+    ...(categories.length > 0
+      ? categories.map((c) => ({
+          name: c.name,
+          path: `/products?category=${c.slug}`
+        }))
+      : [
+          { name: 'Classic Roasted', path: '/products?category=classic-roasted' },
+          { name: 'Gourmet Spiced', path: '/products?category=gourmet-flavoured' },
+          { name: 'Sweet Delights', path: '/products?category=sweet-delights' },
+          { name: 'Raw Superfood', path: '/products?category=raw-superfood' },
+          { name: 'Family Combos', path: '/products?category=combos-and-family-packs' }
+        ])
   ];
 
-  const isFestive = activeTheme && activeTheme.occasion !== 'default';
+  // Delivery promise display (admin-configured or active theme)
+  const deliveryETA = activeTheme?.deliveryPillTime || 'Express Dispatch';
+  const deliveryBadge = activeTheme?.deliveryPillBadge || 'Instant Dispatch';
 
   return (
     <>
       <header className="sticky top-0 z-40 transition-all border-b border-white/10 shadow-md">
         <FestiveHeaderBackground theme={activeTheme}>
-          {/* 1. Optional Festive Promotional Announcement Banner */}
+          {/* Optional Festive Greeting / Announcement Bar */}
           {activeTheme?.greeting && (
-            <div className="bg-black/40 backdrop-blur-md border-b border-white/10 text-white text-[11px] sm:text-xs py-1.5 px-4 text-center">
-              <div className="max-w-7xl mx-auto flex items-center justify-center gap-2 flex-wrap">
+            <div className="bg-black/45 backdrop-blur-md border-b border-white/10 text-white text-[11px] py-1 px-3 text-center">
+              <div className="max-w-7xl mx-auto flex items-center justify-center gap-1.5 flex-wrap">
                 <span className="font-extrabold text-amber-300">
                   {activeTheme.badgeText || 'Festive Special'}
                 </span>
                 <span className="text-gray-300 hidden sm:inline">•</span>
-                <span className="font-medium text-white/95">{activeTheme.greeting}</span>
+                <span className="font-medium text-white/95 truncate max-w-[240px] sm:max-w-none">
+                  {activeTheme.greeting}
+                </span>
                 {activeTheme.ctaText && (
                   <Link
                     to={activeTheme.ctaLink || '/products'}
-                    className="inline-flex items-center gap-1 font-black text-amber-300 hover:text-amber-200 underline underline-offset-2 ml-1"
+                    className="inline-flex items-center gap-0.5 font-black text-amber-300 hover:text-amber-200 underline underline-offset-2 ml-1"
                   >
                     <span>{activeTheme.ctaText}</span>
-                    <ArrowRight className="w-3 h-3" />
+                    <ArrowRight className="w-2.5 h-2.5" />
                   </Link>
                 )}
               </div>
             </div>
           )}
 
-          {/* 2. Main Quick-Commerce Top Navigation */}
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-20 gap-3 sm:gap-6">
-              {/* Left: Brand Logo & Delivery Pill */}
-              <div className="flex items-center gap-3 sm:gap-5 shrink-0">
-                <Link to="/" className="flex items-center gap-2.5 group">
-                  <div className="w-10 h-10 rounded-xl bg-qcPurple-800/90 backdrop-blur-md flex items-center justify-center text-qcYellow-400 shadow-md border border-qcPurple-500/50 group-hover:scale-105 transition">
-                    <Sparkles className="w-5 h-5 text-qcYellow-400" />
+          {/* Main Mobile-First Navigation Block */}
+          <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2.5 sm:py-3 space-y-2">
+            {/* Top Row: Logo, Location Picker, and Shopping Actions */}
+            <div className="flex items-center justify-between gap-2 sm:gap-4">
+              {/* Left: Brand Logo & Delivery ETA Pill */}
+              <div className="flex items-center gap-2 sm:gap-4 min-w-0">
+                <Link to="/" className="flex items-center gap-2 shrink-0 group">
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-qcPurple-800/90 backdrop-blur-md flex items-center justify-center text-qcYellow-400 shadow-md border border-qcPurple-500/50 group-hover:scale-105 transition shrink-0">
+                    <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-qcYellow-400" />
                   </div>
-                  <div className="flex flex-col">
-                    <span className="font-sans font-black text-2xl tracking-tight text-white drop-shadow-sm leading-none">
+                  <div className="flex flex-col leading-none">
+                    <span className="font-sans font-black text-xl sm:text-2xl tracking-tight text-white drop-shadow-sm">
                       Zuno
                     </span>
-                    <span className="text-[10px] uppercase font-black tracking-widest text-emerald-300 mt-0.5">
-                      Artisanal Superfood
+                    <span className="text-[9px] uppercase font-black tracking-widest text-emerald-300 mt-0.5">
+                      Artisanal
                     </span>
                   </div>
                 </Link>
 
-                {/* Express Delivery Location Pill with Dynamic Theme Badge */}
-                <div className="hidden sm:flex flex-col text-left pl-3 sm:pl-4 border-l border-white/20">
-                  <div className="flex items-center gap-1.5 font-black text-xs text-white">
-                    <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-amber-400 text-charcoal-950 font-black text-[10px] shadow-2xs">
-                      <Zap className="w-2.5 h-2.5 fill-charcoal-950" />{' '}
-                      {activeTheme?.deliveryPillBadge || 'Express Dispatch'}
+                {/* Delivery Location & ETA Pill (Zepto Style) */}
+                <div className="flex flex-col text-left pl-2 sm:pl-3 border-l border-white/20 min-w-0">
+                  <div className="flex items-center gap-1 font-black text-[10px] sm:text-xs text-white leading-none">
+                    <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-amber-400 text-charcoal-950 font-black text-[9px] shadow-2xs shrink-0">
+                      <Zap className="w-2 h-2 fill-charcoal-950" /> {deliveryBadge}
                     </span>
-                    <span className="text-[11px] font-bold text-gray-200">Delivery to</span>
+                    <span className="text-[10px] font-bold text-gray-200 hidden xs:inline truncate">
+                      {deliveryETA}
+                    </span>
                   </div>
+
                   <button
                     onClick={() => setIsLocationModalOpen(true)}
-                    className="text-xs font-black text-white/95 flex items-center gap-1 hover:text-amber-300 truncate max-w-[160px] md:max-w-[200px]"
+                    className="text-[11px] sm:text-xs font-black text-white/95 flex items-center gap-0.5 hover:text-amber-300 truncate max-w-[130px] xs:max-w-[180px] sm:max-w-[240px] mt-0.5"
+                    aria-label="Change delivery location"
                   >
                     <MapPin className="w-3 h-3 text-amber-400 shrink-0" />
                     <span className="truncate">{selectedLocation}</span>
@@ -175,55 +197,33 @@ export default function Navbar() {
                 </div>
               </div>
 
-              {/* Center: Wide High-Contrast Search Bar */}
-              <div className="flex-1 max-w-xl hidden md:block">
-                <form onSubmit={handleSearchSubmit} className="relative w-full">
-                  <input
-                    type="text"
-                    placeholder={searchSuggestions[placeholderIndex]}
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 text-xs sm:text-sm bg-white/95 backdrop-blur-md border border-white/30 rounded-xl shadow-md focus:outline-none focus:border-amber-400 focus:bg-white focus:ring-2 focus:ring-amber-300/40 transition-all text-charcoal-950 placeholder-gray-500 font-semibold"
-                  />
-                  <Search className="w-4 h-4 text-gray-500 absolute left-3.5 top-3 pointer-events-none" />
-                </form>
-              </div>
-
-              {/* Right: User Account, Wishlist, and Zepto Cart Pill */}
-              <div className="flex items-center space-x-2 sm:space-x-3 shrink-0">
-                {/* Mobile Search Button */}
-                <button
-                  onClick={() => setIsMobileMenuOpen(true)}
-                  className="md:hidden p-2 text-white hover:text-amber-300 rounded-lg"
-                  aria-label="Search"
-                >
-                  <Search className="w-5 h-5" />
-                </button>
-
-                {/* Wishlist Link */}
+              {/* Right: Profile, Wishlist and Cart Action */}
+              <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
+                {/* Wishlist Link (Tablet/Desktop) */}
                 {isAuthenticated && (
                   <Link
                     to="/wishlist"
                     className="p-2 text-white hover:text-amber-300 hover:bg-white/10 rounded-xl transition relative hidden sm:flex"
                     title="Wishlist"
                   >
-                    <Heart className="w-5 h-5" />
+                    <Heart className="w-4 h-4" />
                   </Link>
                 )}
 
-                {/* User Account Dropdown */}
+                {/* Profile Button */}
                 <div className="relative">
                   {isAuthenticated ? (
                     <div>
                       <button
                         onClick={() => setIsProfileOpen(!isProfileOpen)}
-                        className="flex items-center gap-1.5 py-1.5 px-3 rounded-xl bg-white/15 hover:bg-white/25 border border-white/20 text-xs font-bold text-white transition backdrop-blur-sm"
+                        className="flex items-center gap-1.5 py-1.5 px-2.5 sm:px-3 rounded-xl bg-white/15 hover:bg-white/25 border border-white/20 text-xs font-bold text-white transition backdrop-blur-sm h-9 min-w-[36px]"
+                        aria-label="User Account"
                       >
                         <User className="w-4 h-4 text-amber-300" />
-                        <span className="hidden lg:inline max-w-[80px] truncate">
+                        <span className="hidden md:inline max-w-[70px] truncate">
                           {user.name.split(' ')[0]}
                         </span>
-                        <ChevronDown className="w-3.5 h-3.5 text-gray-300" />
+                        <ChevronDown className="w-3 h-3 text-gray-300 hidden sm:inline" />
                       </button>
 
                       {isProfileOpen && (
@@ -298,52 +298,58 @@ export default function Navbar() {
                   ) : (
                     <Link
                       to="/login"
-                      className="flex items-center gap-1.5 py-2 px-3.5 rounded-xl bg-white/15 hover:bg-white/25 text-white border border-white/20 text-xs font-bold transition backdrop-blur-sm"
+                      className="flex items-center gap-1.5 py-1.5 px-3 rounded-xl bg-white/15 hover:bg-white/25 text-white border border-white/20 text-xs font-bold transition backdrop-blur-sm h-9"
                     >
                       <User className="w-3.5 h-3.5 text-amber-300" />
-                      <span>Login</span>
+                      <span className="hidden sm:inline">Login</span>
                     </Link>
                   )}
                 </div>
 
-                {/* Zepto-Style Cart Trigger Pill with Live Amount */}
+                {/* Zepto Cart Button Pill */}
                 <button
                   onClick={() => setIsDrawerOpen(true)}
-                  className="flex items-center gap-2 py-2 px-3 sm:px-4 rounded-xl bg-qcGreen-700 hover:bg-qcGreen-800 text-white font-extrabold shadow-md transition active:scale-95 group border border-qcGreen-500/40"
+                  className="flex items-center gap-1.5 sm:gap-2 py-1.5 px-2.5 sm:px-3.5 rounded-xl bg-qcGreen-700 hover:bg-qcGreen-800 text-white font-extrabold shadow-md transition active:scale-95 border border-qcGreen-500/40 h-9"
+                  aria-label="View Cart"
                 >
-                  <ShoppingBag className="w-4 h-4 text-qcYellow-300 group-hover:scale-110 transition" />
+                  <ShoppingBag className="w-4 h-4 text-qcYellow-300 shrink-0" />
                   <div className="flex flex-col text-left leading-none">
-                    <span className="text-[10px] uppercase font-bold text-qcGreen-100">
+                    <span className="text-[9px] uppercase font-bold text-qcGreen-100">
                       {cartCount} {cartCount === 1 ? 'item' : 'items'}
                     </span>
                     <span className="text-xs font-black text-white">₹{cartSubtotal}</span>
                   </div>
                 </button>
-
-                {/* Mobile Hamburger */}
-                <button
-                  onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                  className="md:hidden p-2 text-white hover:text-amber-300 rounded-lg"
-                  aria-label="Toggle Navigation Menu"
-                >
-                  {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-                </button>
               </div>
+            </div>
+
+            {/* Row 2: Full-Width Quick-Commerce Search Bar */}
+            <div className="w-full">
+              <form onSubmit={handleSearchSubmit} className="relative w-full">
+                <input
+                  type="text"
+                  placeholder={searchPlaceholders[placeholderIndex]}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-9 pr-4 py-2.5 text-xs sm:text-sm bg-white/95 backdrop-blur-md border border-white/30 rounded-xl shadow-md focus:outline-none focus:border-amber-400 focus:bg-white focus:ring-2 focus:ring-amber-300/40 transition-all text-charcoal-950 placeholder-gray-500 font-semibold h-11"
+                />
+                <Search className="w-4 h-4 text-gray-500 absolute left-3 top-3.5 pointer-events-none" />
+              </form>
             </div>
           </div>
 
-          {/* 3. Zepto-Style Category Ribbon Strip */}
-          <div className="bg-black/35 backdrop-blur-md border-t border-white/10 px-4 sm:px-6 lg:px-8 py-2 overflow-x-auto scrollbar-none">
-            <div className="max-w-7xl mx-auto flex items-center gap-2 sm:gap-4 shrink-0">
+          {/* Row 3: Horizontally Scrollable Category Rail (Zepto Style) */}
+          <div className="bg-black/35 backdrop-blur-md border-t border-white/10 px-3 sm:px-6 lg:px-8 py-2 overflow-x-auto scrollbar-none">
+            <div className="max-w-7xl mx-auto flex items-center gap-2 sm:gap-3 shrink-0">
               {navCategories.map((cat) => {
                 const isActive = location.pathname + location.search === cat.path;
                 return (
                   <Link
                     key={cat.name}
                     to={cat.path}
-                    className={`text-xs font-bold px-3 py-1.5 rounded-lg whitespace-nowrap transition-all ${
+                    className={`text-xs font-bold px-3 py-1.5 rounded-lg whitespace-nowrap transition-all shrink-0 ${
                       isActive
-                        ? 'bg-amber-400 text-charcoal-950 shadow-sm'
+                        ? 'bg-amber-400 text-charcoal-950 shadow-sm font-black'
                         : 'text-white/90 hover:bg-white/15 hover:text-white'
                     }`}
                   >
@@ -354,7 +360,7 @@ export default function Navbar() {
             </div>
           </div>
 
-          {/* 4. Integrated Coupon Promotional Strip */}
+          {/* Row 4: Horizontal Promotional Coupon Strip */}
           <CouponStrip />
         </FestiveHeaderBackground>
       </header>
@@ -372,35 +378,6 @@ export default function Navbar() {
           }
         }}
       />
-
-      {/* Mobile Drawer Menu */}
-      {isMobileMenuOpen && (
-        <div className="md:hidden border-t border-cream-300 bg-white px-4 pt-3 pb-6 space-y-3 shadow-lg">
-          <form onSubmit={handleSearchSubmit} className="relative mb-3">
-            <input
-              type="text"
-              placeholder="Search flavours, combos..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 text-sm bg-cream-100 border border-cream-300 rounded-xl"
-            />
-            <Search className="w-4 h-4 text-gray-500 absolute left-3 top-3 pointer-events-none" />
-          </form>
-
-          <div className="flex flex-col space-y-1">
-            {navCategories.map((link) => (
-              <Link
-                key={link.name}
-                to={link.path}
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="px-3 py-2 text-xs font-bold text-charcoal-800 hover:bg-cream-100 rounded-lg"
-              >
-                {link.name}
-              </Link>
-            ))}
-          </div>
-        </div>
-      )}
     </>
   );
 }
