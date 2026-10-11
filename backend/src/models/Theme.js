@@ -166,6 +166,44 @@ const themeSchema = new mongoose.Schema({
     default: '12 Mins'
   },
 
+  // Dynamic Moving Festive Deity & Hero Visual Engine
+  heroVisualType: {
+    type: String,
+    enum: [
+      'durga_navratri',
+      'diwali_lakshmi_ganesh',
+      'holi_radha_krishna',
+      'rakhi_sibling',
+      'christmas_joy',
+      'new_year_celebration',
+      'default_lotus',
+      'none'
+    ],
+    default: 'durga_navratri'
+  },
+  heroVisualCycleSeconds: {
+    type: Number,
+    default: 3.2,
+    min: 1,
+    max: 15
+  },
+  enableFloatingPetals: {
+    type: Boolean,
+    default: true
+  },
+  enableRotatingAura: {
+    type: Boolean,
+    default: true
+  },
+  enableFlickeringDiyas: {
+    type: Boolean,
+    default: true
+  },
+  heroVisualCustomImages: {
+    type: [String],
+    default: []
+  },
+
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'

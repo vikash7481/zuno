@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../../api/client';
 import ProductCard from '../../components/customer/ProductCard';
+import FestiveMaaBanner from '../../components/customer/FestiveMaaBanner';
 import ProductCardSkeleton from '../../components/common/ProductCardSkeleton';
+import { getThemeStyles } from '../../utils/themeStyles';
 import {
   Zap,
   Flame,
@@ -15,23 +17,33 @@ import {
   Tag,
   Percent,
   TrendingUp,
-  Award
+  Award,
+  Heart,
+  Gift,
+  Package,
+  Crown
 } from 'lucide-react';
 
 export default function Home() {
   const [bestsellers, setBestsellers] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [activeFestiveTab, setActiveFestiveTab] = useState('top_picks');
+  const [activeTheme, setActiveTheme] = useState(null);
 
   useEffect(() => {
     const fetchHomeData = async () => {
       try {
-        const [prodRes, catRes] = await Promise.all([
+        const [prodRes, catRes, themeRes] = await Promise.all([
           api.get('/products?limit=12'),
-          api.get('/products/categories')
+          api.get('/products/categories'),
+          api.get('/themes/active').catch(() => ({ data: {} }))
         ]);
         setBestsellers(prodRes.data.products || []);
         setCategories(catRes.data.categories || []);
+        if (themeRes.data?.success && themeRes.data.theme) {
+          setActiveTheme(themeRes.data.theme);
+        }
       } catch (err) {
         console.error('Failed to load home page data:', err);
       } finally {
@@ -39,145 +51,251 @@ export default function Home() {
       }
     };
     fetchHomeData();
+
+    const handleSync = () => {
+      api.get('/themes/active').then((res) => {
+        if (res.data?.success && res.data.theme) {
+          setActiveTheme(res.data.theme);
+        }
+      }).catch(() => {});
+    };
+    window.addEventListener('storage', handleSync);
+    window.addEventListener('zuno_active_theme_sync', handleSync);
+    return () => {
+      window.removeEventListener('storage', handleSync);
+      window.removeEventListener('zuno_active_theme_sync', handleSync);
+    };
   }, []);
 
-  const promoBanners = [
+  const themeStyles = getThemeStyles(activeTheme);
+
+  // Blinkit Festive Curated Hub Grid (Matching the user's reference screenshot)
+  const festiveCuratedCards = [
     {
-      id: 1,
-      badge: '⚡ EXPRESS DISPATCH',
-      title: 'Craving Artisanal Crunch?',
-      subtitle: 'Slow-roasted jumbo fox nuts tossed in cold-pressed virgin olive oil.',
-      cta: 'Shop Fresh Roasts',
-      link: '/products',
-      bgGradient: 'from-qcPurple-900 via-qcPurple-800 to-brand-800',
-      badgeBg: 'bg-qcYellow-400 text-charcoal-950'
+      id: 'fasting-flours',
+      title: 'Fasting Flours',
+      subtitle: 'Starting at ₹29',
+      priceTag: '₹65',
+      mrpTag: '₹72',
+      tagLabel: 'Dhoop & Vrat Pack',
+      img: 'https://images.unsplash.com/photo-1599599810769-bcde5a160d32?auto=format&fit=crop&w=400&q=80',
+      link: '/products?category=classic-roasted',
+      featured: true
     },
     {
-      id: 2,
-      badge: '🎉 SPECIAL OFFER',
-      title: 'Flat ₹50 OFF Your First Snack',
-      subtitle: 'Apply code ZUNO50 at checkout on orders above ₹299.',
-      cta: 'Use Code ZUNO50',
-      link: '/products',
-      bgGradient: 'from-brand-800 via-qcGreen-800 to-qcGreen-700',
-      badgeBg: 'bg-white text-qcGreen-800'
+      id: 'fasting-essentials',
+      title: 'Fasting Essentials',
+      subtitle: 'Sendha Namak & Pure Ghee',
+      img: 'https://images.unsplash.com/photo-1509358271058-acd22cc93898?auto=format&fit=crop&w=400&q=80',
+      link: '/products?category=classic-roasted'
+    },
+    {
+      id: 'kids-mela',
+      title: 'Kids Mela',
+      subtitle: 'Sweet Caramel & Cacao',
+      img: 'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?auto=format&fit=crop&w=400&q=80',
+      link: '/products?category=sweet-delights'
+    },
+    {
+      id: 'dandiya-ready',
+      title: 'Dandiya Ready',
+      subtitle: 'Energy Roasts & Treats',
+      img: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=400&q=80',
+      link: '/products?category=gourmet-flavoured'
+    },
+    {
+      id: 'kanjak-corner',
+      title: 'Kanjak Corner',
+      subtitle: 'Gift Boxes & Samplers',
+      img: 'https://images.unsplash.com/photo-1607344645866-009c320c5ab8?auto=format&fit=crop&w=400&q=80',
+      link: '/products?category=combos-and-family-packs'
     }
   ];
 
-  const categoryPastels = [
-    { bg: 'bg-emerald-50 hover:bg-emerald-100', border: 'border-emerald-200', text: 'text-emerald-900' },
-    { bg: 'bg-rose-50 hover:bg-rose-100', border: 'border-rose-200', text: 'text-rose-900' },
-    { bg: 'bg-amber-50 hover:bg-amber-100', border: 'border-amber-200', text: 'text-amber-900' },
-    { bg: 'bg-purple-50 hover:bg-purple-100', border: 'border-purple-200', text: 'text-purple-900' },
-    { bg: 'bg-blue-50 hover:bg-blue-100', border: 'border-blue-200', text: 'text-blue-900' }
+  // « Festive Picks » Circular Pills Rail
+  const festivePillCategories = [
+    {
+      id: 'top_picks',
+      name: 'Top Picks',
+      icon: '🎖️',
+      isBadge: true,
+      categoryQuery: ''
+    },
+    {
+      id: 'vrat_flour',
+      name: 'Vrat Flour',
+      img: 'https://images.unsplash.com/photo-1509358271058-acd22cc93898?auto=format&fit=crop&w=120&q=80',
+      categoryQuery: 'classic-roasted'
+    },
+    {
+      id: 'flowers_fruits',
+      name: 'Flowers & Fruits',
+      img: 'https://images.unsplash.com/photo-1599599810769-bcde5a160d32?auto=format&fit=crop&w=120&q=80',
+      categoryQuery: 'raw-superfood'
+    },
+    {
+      id: 'vrat_snacks',
+      name: 'Vrat Snacks',
+      img: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=120&q=80',
+      categoryQuery: 'classic-roasted'
+    },
+    {
+      id: 'chunri_shringar',
+      name: 'Chunri & Shringar',
+      img: 'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?auto=format&fit=crop&w=120&q=80',
+      categoryQuery: 'combos-and-family-packs'
+    },
+    {
+      id: 'khetri_specials',
+      name: 'Khetri Specials',
+      img: 'https://images.unsplash.com/photo-1607344645866-009c320c5ab8?auto=format&fit=crop&w=120&q=80',
+      categoryQuery: 'gourmet-flavoured'
+    }
   ];
 
   return (
-    <div className="space-y-8 sm:space-y-12 pb-24">
-      {/* Zepto-Style Promotional Banners Grid */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {promoBanners.map((banner) => (
-            <div
-              key={banner.id}
-              className={`relative rounded-3xl p-6 sm:p-8 bg-gradient-to-r ${banner.bgGradient} text-white overflow-hidden shadow-card flex flex-col justify-between min-h-[190px]`}
-            >
-              <div className="relative z-10 space-y-2">
-                <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-black text-[10px] tracking-wider uppercase shadow-2xs ${banner.badgeBg}`}>
-                  {banner.badge}
-                </span>
-                <h2 className="font-sans font-black text-2xl sm:text-3xl text-white tracking-tight leading-tight">
-                  {banner.title}
-                </h2>
-                <p className="text-xs sm:text-sm text-white/80 max-w-sm">
-                  {banner.subtitle}
-                </p>
-              </div>
+    <div className="space-y-6 sm:space-y-10 pb-24 bg-[#FFFDF7]">
+      {/* 1. Curated Festive Hero Section — Seamlessly matches active theme */}
+      <section
+        className="px-3 sm:px-6 pt-4 pb-7 rounded-b-3xl shadow-sm overflow-hidden relative transition-colors duration-700"
+        style={{ background: themeStyles.homeSectionBg }}
+      >
+        {/* Dynamic Animated Moving Festive Deity Banner */}
+        <FestiveMaaBanner activeThemeProp={activeTheme} />
 
-              <div className="relative z-10 pt-4">
-                <Link
-                  to={banner.link}
-                  className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-white text-charcoal-950 font-black text-xs hover:bg-qcYellow-400 transition shadow-sm group"
-                >
-                  <span>{banner.cta}</span>
-                  <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-                </Link>
-              </div>
+        {/* 2. Curated Quick-Commerce Festive Grid (Matching Blinkit Cards Layout with matching luxury glassmorphism) */}
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 sm:gap-3.5">
+            {festiveCuratedCards.map((card, idx) => (
+              <Link
+                key={card.id}
+                to={card.link}
+                className={`p-3 rounded-2xl ${themeStyles.cardBg} transition-all duration-200 hover:-translate-y-0.5 flex flex-col justify-between overflow-hidden relative group ${
+                  idx === 0 ? 'col-span-2 sm:col-span-1' : ''
+                }`}
+              >
+                {/* Header Text */}
+                <div className="z-10">
+                  <h3 className={`font-sans font-black text-xs sm:text-sm leading-tight ${themeStyles.cardTitleColor}`}>
+                    {card.title}
+                  </h3>
+                  <p className={`text-[11px] font-bold mt-0.5 ${themeStyles.cardSubtitleColor}`}>
+                    {card.subtitle}
+                  </p>
+                </div>
 
-              {/* Background ambient glow circle */}
-              <div className="absolute -right-10 -bottom-10 w-44 h-44 rounded-full bg-white/10 blur-2xl pointer-events-none" />
-            </div>
-          ))}
+                {/* Price & Tag Pill (if featured) */}
+                {card.priceTag && (
+                  <div className="my-2 z-10 flex items-center gap-1.5 flex-wrap">
+                    <span className="bg-[#DC2626] text-white font-black text-[11px] px-2 py-0.5 rounded-md shadow-2xs">
+                      {card.priceTag}
+                    </span>
+                    {card.mrpTag && (
+                      <span className="text-[10px] text-white/60 font-bold line-through">
+                        {card.mrpTag}
+                      </span>
+                    )}
+                    {card.tagLabel && (
+                      <span className="text-[10px] font-bold text-amber-200/90 block w-full mt-0.5">
+                        {card.tagLabel}
+                      </span>
+                    )}
+                  </div>
+                )}
+
+                {/* Preview Thumbnail */}
+                <div className={`mt-2 w-full h-24 sm:h-28 rounded-xl overflow-hidden ${themeStyles.cardImageBg} p-1 flex items-center justify-center group-hover:scale-102 transition-transform`}>
+                  <img
+                    src={card.img}
+                    alt={card.title}
+                    className="w-full h-full object-cover rounded-lg"
+                    loading="lazy"
+                  />
+                </div>
+              </Link>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* Zepto-Style "Explore By Category" Squircle Rail */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="font-sans font-black text-lg sm:text-2xl text-charcoal-950 tracking-tight flex items-center gap-2">
-              <span>Explore Categories</span>
-            </h2>
-            <p className="text-xs text-gray-500 font-medium">Handcrafted single-origin lotus seeds</p>
-          </div>
-          <Link
-            to="/products"
-            className="text-xs font-black text-qcPurple-700 hover:text-qcPurple-900 flex items-center gap-1"
-          >
-            <span>See All</span>
-            <ChevronRight className="w-4 h-4" />
-          </Link>
+      {/* 3. « Festive Picks » Section (Deep Maroon Flourish & Circular Carousel) */}
+      <section className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 space-y-4">
+        {/* Festive Picks Header with Traditional Diamond Flourishes */}
+        <div className="flex items-center justify-center gap-2 pt-2 text-center">
+          <span className="text-amber-600 font-bold text-sm">❖</span>
+          <span className="h-[1px] w-12 sm:w-20 bg-rose-900/30" />
+          <h2 className="font-serif font-black text-xl sm:text-2xl text-[#881337] tracking-tight">
+            Festive Picks
+          </h2>
+          <span className="h-[1px] w-12 sm:w-20 bg-rose-900/30" />
+          <span className="text-amber-600 font-bold text-sm">❖</span>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4">
-          {categories.map((cat, idx) => {
-            const pastel = categoryPastels[idx % categoryPastels.length];
+        {/* Circular Category Pills Bar */}
+        <div className="flex items-center gap-3 sm:gap-4 overflow-x-auto scrollbar-none py-2 px-1">
+          {festivePillCategories.map((item) => {
+            const isSelected = activeFestiveTab === item.id;
             return (
-              <Link
-                key={cat._id}
-                to={`/products?category=${cat.slug}`}
-                className={`p-4 rounded-2xl border ${pastel.bg} ${pastel.border} transition-all duration-200 hover:-translate-y-1 hover:shadow-card text-center flex flex-col items-center justify-between space-y-2 group`}
+              <button
+                key={item.id}
+                onClick={() => setActiveFestiveTab(item.id)}
+                className={`flex flex-col items-center justify-center gap-1.5 shrink-0 transition-all select-none group min-w-[72px]`}
               >
-                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl overflow-hidden bg-white shadow-sm p-1 border border-cream-200 group-hover:scale-105 transition-transform">
-                  <img
-                    src={cat.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=200&q=80'}
-                    alt={cat.name}
-                    className="w-full h-full object-cover rounded-xl"
-                  />
+                {/* Circular Container */}
+                <div
+                  className={`w-14 h-14 sm:w-16 sm:h-16 rounded-full overflow-hidden flex items-center justify-center transition-all ${
+                    isSelected
+                      ? 'border-2 border-[#881337] ring-2 ring-amber-300 shadow-sm bg-amber-50'
+                      : 'border border-cream-300 bg-white shadow-2xs group-hover:border-amber-400'
+                  }`}
+                >
+                  {item.isBadge ? (
+                    <div className="w-full h-full flex flex-col items-center justify-center bg-amber-100/70 text-[#881337]">
+                      <Award className="w-6 h-6 text-[#991B1B] fill-amber-400" />
+                    </div>
+                  ) : (
+                    <img
+                      src={item.img}
+                      alt={item.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                    />
+                  )}
                 </div>
-                <div>
-                  <h3 className={`font-sans font-extrabold text-xs sm:text-sm ${pastel.text} leading-tight`}>
-                    {cat.name}
-                  </h3>
-                  <span className="text-[10px] font-bold text-gray-500 mt-0.5 block">
-                    ⚡ Express
-                  </span>
-                </div>
-              </Link>
+
+                {/* Title */}
+                <span
+                  className={`text-[11px] font-black text-center max-w-[76px] leading-tight line-clamp-2 ${
+                    isSelected ? 'text-[#881337]' : 'text-charcoal-800'
+                  }`}
+                >
+                  {item.name}
+                </span>
+              </button>
             );
           })}
         </div>
       </section>
 
-      {/* Product Rail: Handcrafted Bestsellers */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
+      {/* 4. Product Rail: Handcrafted Bestsellers & Quick Commerce Grid */}
+      <section className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 space-y-4">
         <div className="flex items-center justify-between border-b border-cream-200 pb-3">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl bg-qcYellow-400 flex items-center justify-center text-charcoal-950 font-black shadow-2xs">
+            <div className="w-8 h-8 rounded-xl bg-[#FACC15] flex items-center justify-center text-charcoal-950 font-black shadow-2xs">
               <Zap className="w-4 h-4 fill-charcoal-950" />
             </div>
             <div>
               <h2 className="font-sans font-black text-lg sm:text-2xl text-charcoal-950 tracking-tight flex items-center gap-2">
                 <span>Handcrafted Bestsellers</span>
               </h2>
-              <p className="text-xs text-gray-500 font-medium">Bestselling roasts freshly packed from our dark store</p>
+              <p className="text-xs text-gray-500 font-medium">100% Sendha Namak & artisan slow-roasted makhana</p>
             </div>
           </div>
+
           <Link
             to="/products"
-            className="text-xs font-black text-qcPurple-700 hover:text-qcPurple-900 flex items-center gap-1"
+            className="text-xs font-black text-emerald-800 hover:text-emerald-950 flex items-center gap-1"
           >
-            <span>View All</span>
+            <span>See All</span>
             <ChevronRight className="w-4 h-4" />
           </Link>
         </div>
@@ -197,16 +315,16 @@ export default function Home() {
         )}
       </section>
 
-      {/* Quick Value & Quality Guarantees Bar (Zepto Style) */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 p-5 sm:p-6 rounded-3xl bg-cream-50 border border-cream-300">
+      {/* 5. Quick Value & Fresh Roasting Assurances (Blinkit / Zepto Style) */}
+      <section className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 p-4 sm:p-6 rounded-3xl bg-white border border-amber-200/80 shadow-2xs">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-qcYellow-100 flex items-center justify-center text-qcYellow-700 shrink-0">
-              <Zap className="w-5 h-5 fill-qcYellow-500" />
+            <div className="w-10 h-10 rounded-2xl bg-amber-100 flex items-center justify-center text-amber-700 shrink-0">
+              <Zap className="w-5 h-5 fill-amber-500" />
             </div>
             <div>
-              <h3 className="font-extrabold text-xs text-charcoal-950">Express Delivery</h3>
-              <p className="text-[11px] text-gray-500 font-medium">Instant hyper-local dispatch</p>
+              <h3 className="font-extrabold text-xs text-charcoal-950">29-Min Delivery</h3>
+              <p className="text-[11px] text-gray-500 font-medium">Hyper-local dark store dispatch</p>
             </div>
           </div>
 
@@ -215,8 +333,8 @@ export default function Home() {
               <Flame className="w-5 h-5 text-emerald-700" />
             </div>
             <div>
-              <h3 className="font-extrabold text-xs text-charcoal-950">Slow Roasted</h3>
-              <p className="text-[11px] text-gray-500 font-medium">0% deep fried or palm oils</p>
+              <h3 className="font-extrabold text-xs text-charcoal-950">Vrat Friendly</h3>
+              <p className="text-[11px] text-gray-500 font-medium">Pink Himalayan Rock Salt</p>
             </div>
           </div>
 
@@ -225,8 +343,8 @@ export default function Home() {
               <Leaf className="w-5 h-5 text-purple-700" />
             </div>
             <div>
-              <h3 className="font-extrabold text-xs text-charcoal-950">Pure Mithila Lotus</h3>
-              <p className="text-[11px] text-gray-500 font-medium">Single-origin jumbo kernels</p>
+              <h3 className="font-extrabold text-xs text-charcoal-950">Mithila Lotus Grade-A</h3>
+              <p className="text-[11px] text-gray-500 font-medium">Jumbo kernels, zero palm oil</p>
             </div>
           </div>
 
@@ -236,7 +354,7 @@ export default function Home() {
             </div>
             <div>
               <h3 className="font-extrabold text-xs text-charcoal-950">FREE Shipping ₹499+</h3>
-              <p className="text-[11px] text-gray-500 font-medium">No hidden handling fees</p>
+              <p className="text-[11px] text-gray-500 font-medium">Zero handling or surge fees</p>
             </div>
           </div>
         </div>

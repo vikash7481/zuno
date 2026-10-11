@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 import api from '../../api/client';
 import FestiveHeaderBackground from '../../components/common/FestiveHeaderBackground';
+import FestiveMaaBanner from '../../components/customer/FestiveMaaBanner';
 
 export default function BusinessThemes() {
   const [themes, setThemes] = useState([]);
@@ -74,12 +75,19 @@ export default function BusinessThemes() {
     animationSpeed: 'normal',
     enableReducedMotionFallback: true,
     deliveryPillBadge: 'Express Dispatch',
-    deliveryPillTime: '12 Mins'
+    deliveryPillTime: '12 Mins',
+    heroVisualType: 'durga_navratri',
+    heroVisualCycleSeconds: 3.2,
+    enableFloatingPetals: true,
+    enableRotatingAura: true,
+    enableFlickeringDiyas: true,
+    heroVisualCustomImages: []
   };
 
   const [formData, setFormData] = useState(initialFormState);
   const [editingThemeId, setEditingThemeId] = useState(null);
   const [previewTheme, setPreviewTheme] = useState(null);
+  const [newCustomImageUrl, setNewCustomImageUrl] = useState('');
 
   const fetchThemes = async () => {
     try {
@@ -103,6 +111,7 @@ export default function BusinessThemes() {
   const handleOpenCreate = () => {
     setEditingThemeId(null);
     setFormData(initialFormState);
+    setNewCustomImageUrl('');
     setIsEditorOpen(true);
   };
 
@@ -110,9 +119,16 @@ export default function BusinessThemes() {
     setEditingThemeId(theme._id);
     setFormData({
       ...theme,
+      heroVisualType: theme.heroVisualType !== undefined ? theme.heroVisualType : 'durga_navratri',
+      heroVisualCycleSeconds: theme.heroVisualCycleSeconds ?? 3.2,
+      enableFloatingPetals: theme.enableFloatingPetals !== false,
+      enableRotatingAura: theme.enableRotatingAura !== false,
+      enableFlickeringDiyas: theme.enableFlickeringDiyas !== false,
+      heroVisualCustomImages: theme.heroVisualCustomImages || [],
       startDate: theme.startDate ? theme.startDate.slice(0, 16) : '',
       endDate: theme.endDate ? theme.endDate.slice(0, 16) : ''
     });
+    setNewCustomImageUrl('');
     setIsEditorOpen(true);
   };
 
@@ -198,6 +214,46 @@ export default function BusinessThemes() {
           ...prev,
           [field]: res.data.mediaUrl
         }));
+      }
+    } catch (err) {
+      setUploadError(err.response?.data?.message || 'File upload failed. Max 35MB.');
+    } finally {
+      setUploadingMedia(false);
+    }
+  };
+
+  const handleAddCustomImage = (url) => {
+    if (!url || !url.trim()) return;
+    setFormData((prev) => ({
+      ...prev,
+      heroVisualCustomImages: [...(prev.heroVisualCustomImages || []), url.trim()]
+    }));
+    setNewCustomImageUrl('');
+  };
+
+  const handleRemoveCustomImage = (index) => {
+    setFormData((prev) => ({
+      ...prev,
+      heroVisualCustomImages: (prev.heroVisualCustomImages || []).filter((_, i) => i !== index)
+    }));
+  };
+
+  const handleCustomImageUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingMedia(true);
+    setUploadError('');
+
+    const uploadFormData = new FormData();
+    uploadFormData.append('media', file);
+
+    try {
+      const res = await api.post('/themes/upload-media', uploadFormData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      if (res.data?.success && res.data.mediaUrl) {
+        handleAddCustomImage(res.data.mediaUrl);
       }
     } catch (err) {
       setUploadError(err.response?.data?.message || 'File upload failed. Max 35MB.');
@@ -471,6 +527,32 @@ export default function BusinessThemes() {
                         <Zap className="w-3 h-3 text-blue-600" />
                         {theme.deliveryPillBadge || 'Express'}
                       </span>
+
+                      {theme.heroVisualType !== 'none' ? (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-50 text-[10px] font-bold text-amber-900 border border-amber-300">
+                          <Sparkles className="w-3 h-3 text-amber-600" />
+                          <span>
+                            {theme.heroVisualType === 'diwali_lakshmi_ganesh'
+                              ? '🪔 Lakshmi & Ganesh'
+                              : theme.heroVisualType === 'holi_radha_krishna'
+                              ? '🎨 Radha Krishna'
+                              : theme.heroVisualType === 'rakhi_sibling'
+                              ? '💝 Rakhi Sutra'
+                              : theme.heroVisualType === 'christmas_joy'
+                              ? '🎄 Christmas Joy'
+                              : theme.heroVisualType === 'new_year_celebration'
+                              ? '🥂 New Year 2026'
+                              : theme.heroVisualType === 'default_lotus'
+                              ? '🪷 Mithila Lotus'
+                              : '✨ Navratri Maa Durga'}{' '}
+                            ({theme.heroVisualCycleSeconds || 3.2}s)
+                          </span>
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-gray-100 text-[10px] font-bold text-gray-600 border border-gray-200">
+                          🚫 No Moving Visual
+                        </span>
+                      )}
                     </div>
 
                     {/* Schedule times if configured */}
@@ -843,10 +925,194 @@ export default function BusinessThemes() {
                   </div>
                 </div>
 
-                {/* Section E: Header Copy & Delivery Pill */}
+                {/* Section E: Dynamic Moving Deity Visual Engine */}
+                <div className="space-y-4 p-4 rounded-2xl bg-amber-50/60 border border-amber-200/90 shadow-2xs">
+                  <div className="flex items-center justify-between border-b border-amber-200 pb-2">
+                    <h4 className="text-xs font-black uppercase tracking-wider text-amber-950 flex items-center gap-1.5">
+                      <Sparkles className="w-4 h-4 text-amber-600" />
+                      <span>5. Moving Deity & Dynamic Hero Visual Engine</span>
+                    </h4>
+                    <span className="text-[10px] font-bold text-amber-800 bg-amber-200/80 px-2 py-0.5 rounded-full">
+                      Blinkit / Zepto Festive Animation
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-charcoal-900 mb-1">
+                        Festive Deity & Spiritual Avatars
+                      </label>
+                      <select
+                        value={formData.heroVisualType}
+                        onChange={(e) => setFormData({ ...formData, heroVisualType: e.target.value })}
+                        className="w-full text-xs font-bold px-3 py-2 bg-white border border-cream-300 rounded-xl focus:border-amber-600"
+                      >
+                        <option value="durga_navratri">✨ Navratri Maa Durga (6 Sacred Avatars Cycling)</option>
+                        <option value="diwali_lakshmi_ganesh">🪔 Shubh Deepavali (Maa Lakshmi, Shri Ganesha & Diyas)</option>
+                        <option value="holi_radha_krishna">🎨 Radha Krishna Phoolon Ki Holi & Braj Ke Rang</option>
+                        <option value="rakhi_sibling">💝 Raksha Bandhan (Pavitra Rakhi Sutra & Sibling Feast)</option>
+                        <option value="christmas_joy">🎄 Winter Holiday & Christmas Joy (Santa & Tree)</option>
+                        <option value="new_year_celebration">🥂 Happy New Year 2026 (Midnight Countdown)</option>
+                        <option value="default_lotus">🪷 Mithila Lotus Heritage & Artisanal Harvest</option>
+                        <option value="none">🚫 No Moving Visual (Standard Static Header)</option>
+                      </select>
+                      <span className="text-[10px] text-gray-500 mt-1 block">
+                        Select the animated deity motif to cycle across your store header.
+                      </span>
+                    </div>
+
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="text-xs font-bold text-charcoal-900">
+                          Photo Change Interval
+                        </label>
+                        <span className="text-[11px] font-mono font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-lg border border-amber-300">
+                          ⏱️ Every {formData.heroVisualCycleSeconds || 3.2}s
+                        </span>
+                      </div>
+                      <input
+                        type="range"
+                        min="1.5"
+                        max="8.0"
+                        step="0.5"
+                        value={formData.heroVisualCycleSeconds || 3.2}
+                        onChange={(e) =>
+                          setFormData({ ...formData, heroVisualCycleSeconds: parseFloat(e.target.value) })
+                        }
+                        className="w-full mt-2 accent-amber-600"
+                      />
+                      <div className="flex justify-between text-[10px] text-gray-400 mt-1">
+                        <span>1.5s (Fast)</span>
+                        <span>3.2s (Standard)</span>
+                        <span>8.0s (Slow)</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Dynamic Visual Effects Toggles */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+                    <label className="flex items-start gap-2.5 p-2.5 bg-white rounded-xl border border-amber-200/60 cursor-pointer hover:border-amber-400 transition">
+                      <input
+                        type="checkbox"
+                        checked={formData.enableRotatingAura !== false}
+                        onChange={(e) =>
+                          setFormData({ ...formData, enableRotatingAura: e.target.checked })
+                        }
+                        className="mt-0.5 rounded text-amber-600 focus:ring-amber-500 accent-amber-600"
+                      />
+                      <div className="text-[11px]">
+                        <span className="font-bold text-charcoal-900 block">Rotating Chakra Aura</span>
+                        <span className="text-gray-500 text-[10px] leading-tight block">
+                          Glowing solar chakra rotating behind avatar
+                        </span>
+                      </div>
+                    </label>
+
+                    <label className="flex items-start gap-2.5 p-2.5 bg-white rounded-xl border border-amber-200/60 cursor-pointer hover:border-amber-400 transition">
+                      <input
+                        type="checkbox"
+                        checked={formData.enableFlickeringDiyas !== false}
+                        onChange={(e) =>
+                          setFormData({ ...formData, enableFlickeringDiyas: e.target.checked })
+                        }
+                        className="mt-0.5 rounded text-amber-600 focus:ring-amber-500 accent-amber-600"
+                      />
+                      <div className="text-[11px]">
+                        <span className="font-bold text-charcoal-900 block">Flickering Diyas</span>
+                        <span className="text-gray-500 text-[10px] leading-tight block">
+                          Glowing clay oil lamps with real flame
+                        </span>
+                      </div>
+                    </label>
+
+                    <label className="flex items-start gap-2.5 p-2.5 bg-white rounded-xl border border-amber-200/60 cursor-pointer hover:border-amber-400 transition">
+                      <input
+                        type="checkbox"
+                        checked={formData.enableFloatingPetals !== false}
+                        onChange={(e) =>
+                          setFormData({ ...formData, enableFloatingPetals: e.target.checked })
+                        }
+                        className="mt-0.5 rounded text-amber-600 focus:ring-amber-500 accent-amber-600"
+                      />
+                      <div className="text-[11px]">
+                        <span className="font-bold text-charcoal-900 block">Floating Petals</span>
+                        <span className="text-gray-500 text-[10px] leading-tight block">
+                          Blessing petals rising smoothly
+                        </span>
+                      </div>
+                    </label>
+                  </div>
+
+                  {/* Custom Deity Photos Upload / URL Strip (Optional) */}
+                  <div className="pt-2 border-t border-amber-200/70 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <label className="text-[11px] font-bold text-charcoal-900">
+                        Custom Deity Photos (Optional Override)
+                      </label>
+                      <span className="text-[10px] text-gray-500">
+                        {(formData.heroVisualCustomImages || []).length} custom image(s) configured
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="url"
+                        value={newCustomImageUrl}
+                        onChange={(e) => setNewCustomImageUrl(e.target.value)}
+                        placeholder="Paste image URL (e.g. https://.../maa-durga.jpg)"
+                        className="flex-1 text-xs px-3 py-1.5 bg-white border border-cream-300 rounded-xl"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleAddCustomImage(newCustomImageUrl)}
+                        className="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold transition shrink-0"
+                      >
+                        + Add Photo
+                      </button>
+                      <label className="cursor-pointer px-3 py-1.5 bg-cream-200 hover:bg-cream-300 text-charcoal-900 rounded-xl text-xs font-bold transition shrink-0 flex items-center gap-1">
+                        <Upload className="w-3.5 h-3.5" />
+                        <span>Upload File</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={handleCustomImageUpload}
+                        />
+                      </label>
+                    </div>
+
+                    {/* Thumbnail strip */}
+                    {(formData.heroVisualCustomImages || []).length > 0 && (
+                      <div className="flex flex-wrap gap-2 pt-1">
+                        {formData.heroVisualCustomImages.map((imgUrl, idx) => (
+                          <div
+                            key={idx}
+                            className="relative group w-14 h-14 rounded-xl border border-amber-300 overflow-hidden bg-white shadow-2xs"
+                          >
+                            <img
+                              src={imgUrl}
+                              alt={`Custom avatar ${idx + 1}`}
+                              className="w-full h-full object-cover"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveCustomImage(idx)}
+                              className="absolute top-0.5 right-0.5 w-4 h-4 bg-red-600 text-white rounded-full flex items-center justify-center opacity-80 hover:opacity-100 transition shadow-xs text-[10px]"
+                              title="Remove photo"
+                            >
+                              <X className="w-3 h-3" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Section F: Header Copy & Delivery Pill */}
                 <div className="space-y-4">
                   <h4 className="text-xs font-black uppercase tracking-wider text-charcoal-950 border-b border-cream-200 pb-1">
-                    5. Header Announcement & Delivery Pill
+                    6. Header Announcement & Delivery Pill
                   </h4>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -919,10 +1185,10 @@ export default function BusinessThemes() {
                   </div>
                 </div>
 
-                {/* Section F: Scheduling & Priority */}
+                {/* Section G: Scheduling & Priority */}
                 <div className="space-y-4">
                   <h4 className="text-xs font-black uppercase tracking-wider text-charcoal-950 border-b border-cream-200 pb-1">
-                    6. Scheduling, Priority & Publication
+                    7. Scheduling, Priority & Publication
                   </h4>
 
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -1119,6 +1385,13 @@ export default function BusinessThemes() {
                       <span className="opacity-80 px-2 py-0.5">Sweet Delights</span>
                     </div>
                   </FestiveHeaderBackground>
+
+                  {/* Real-Time Live Moving Deity Visual Simulator */}
+                  {formData.heroVisualType !== 'none' && (
+                    <div className="bg-gradient-to-b from-[#FED766]/80 via-[#FEE180]/40 to-white/90 border-t border-amber-300/50">
+                      <FestiveMaaBanner activeThemeProp={formData} />
+                    </div>
+                  )}
                 </div>
 
                 <div className="p-3 bg-cream-50 rounded-2xl border border-cream-200 text-[11px] text-gray-600 space-y-1">
@@ -1240,6 +1513,13 @@ export default function BusinessThemes() {
                     <span className="opacity-80">🍯 Sweet Delights</span>
                   </div>
                 </FestiveHeaderBackground>
+
+                {/* Live Animated Festive Deity Banner in Dedicated Preview */}
+                {previewTheme.heroVisualType !== 'none' && (
+                  <div className="bg-gradient-to-b from-[#FED766]/80 via-[#FEE180]/40 to-white/90 border-t border-amber-300/50">
+                    <FestiveMaaBanner activeThemeProp={previewTheme} />
+                  </div>
+                )}
               </div>
             </div>
           </div>

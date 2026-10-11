@@ -126,3 +126,39 @@ html, body {
   max-width: 100%;
   overflow-x: hidden;
 }
+
+/* Festive Moving & Aura Animations */
+@keyframes spinSlow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes auraGlow {
+  0%, 100% { transform: scale(1); opacity: 0.45; filter: drop-shadow(0 0 15px rgba(245, 158, 11, 0.6)); }
+  50% { transform: scale(1.12); opacity: 0.85; filter: drop-shadow(0 0 35px rgba(234, 88, 12, 0.9)); }
+}
+
+@keyframes flameFlicker {
+  0%, 100% { transform: scale(1) translateY(0); filter: brightness(1); }
+  50% { transform: scale(1.1, 0.95) translateY(-2px); filter: brightness(1.25); }
+}
+
+@keyframes floatPetal {
+  0% { transform: translateY(0) translateX(0) rotate(0deg); opacity: 0; }
+  15% { opacity: 0.9; }
+  85% { opacity: 0.9; }
+  100% { transform: translateY(-90px) translateX(25px) rotate(360deg); opacity: 0; }
+}
+
+.animate-spin-slow {
+  animation: spinSlow 28s linear infinite;
+}
+
+.animate-aura-glow {
+  animation: auraGlow 3.2s ease-in-out infinite;
+}
+
+.animate-flame {
+  animation: flameFlicker 1.8s ease-in-out infinite;
+}
+

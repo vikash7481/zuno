@@ -34,7 +34,12 @@ export const THEME_PRESETS = [
     animationSpeed: 'normal',
     enableReducedMotionFallback: true,
     deliveryPillBadge: 'Diwali Rush Express',
-    deliveryPillTime: '12 Mins'
+    deliveryPillTime: '12 Mins',
+    heroVisualType: 'diwali_lakshmi_ganesh',
+    heroVisualCycleSeconds: 3.2,
+    enableFloatingPetals: true,
+    enableRotatingAura: true,
+    enableFlickeringDiyas: true
   },
   {
     name: 'Navratri Garba & Dandiya Edition',
@@ -68,7 +73,12 @@ export const THEME_PRESETS = [
     animationSpeed: 'normal',
     enableReducedMotionFallback: true,
     deliveryPillBadge: 'Vrat Express Dispatch',
-    deliveryPillTime: '10 Mins'
+    deliveryPillTime: '10 Mins',
+    heroVisualType: 'durga_navratri',
+    heroVisualCycleSeconds: 3.2,
+    enableFloatingPetals: true,
+    enableRotatingAura: true,
+    enableFlickeringDiyas: true
   },
   {
     name: 'Holi Colors of Joy Edition',
@@ -102,7 +112,12 @@ export const THEME_PRESETS = [
     animationSpeed: 'fast',
     enableReducedMotionFallback: true,
     deliveryPillBadge: 'Holi Express Party Dispatch',
-    deliveryPillTime: '15 Mins'
+    deliveryPillTime: '15 Mins',
+    heroVisualType: 'holi_radha_krishna',
+    heroVisualCycleSeconds: 3.2,
+    enableFloatingPetals: true,
+    enableRotatingAura: true,
+    enableFlickeringDiyas: false
   },
   {
     name: 'Raksha Bandhan Sweet Bonds Edition',
@@ -136,7 +151,12 @@ export const THEME_PRESETS = [
     animationSpeed: 'normal',
     enableReducedMotionFallback: true,
     deliveryPillBadge: 'Rakhi Gift Express',
-    deliveryPillTime: '15 Mins'
+    deliveryPillTime: '15 Mins',
+    heroVisualType: 'rakhi_sibling',
+    heroVisualCycleSeconds: 3.2,
+    enableFloatingPetals: true,
+    enableRotatingAura: true,
+    enableFlickeringDiyas: true
   },
   {
     name: 'Christmas Joy & Winter Wonderland',
@@ -170,7 +190,12 @@ export const THEME_PRESETS = [
     animationSpeed: 'slow',
     enableReducedMotionFallback: true,
     deliveryPillBadge: 'Winter Express Delivery',
-    deliveryPillTime: '15 Mins'
+    deliveryPillTime: '15 Mins',
+    heroVisualType: 'christmas_joy',
+    heroVisualCycleSeconds: 3.2,
+    enableFloatingPetals: true,
+    enableRotatingAura: true,
+    enableFlickeringDiyas: false
   },
   {
     name: 'New Year 2026 Celebration Edition',
@@ -204,7 +229,12 @@ export const THEME_PRESETS = [
     animationSpeed: 'fast',
     enableReducedMotionFallback: true,
     deliveryPillBadge: 'Midnight Express',
-    deliveryPillTime: '12 Mins'
+    deliveryPillTime: '12 Mins',
+    heroVisualType: 'new_year_celebration',
+    heroVisualCycleSeconds: 3.2,
+    enableFloatingPetals: true,
+    enableRotatingAura: true,
+    enableFlickeringDiyas: false
   },
   {
     name: 'Default Zuno Artisanal Storefront',
@@ -238,7 +268,12 @@ export const THEME_PRESETS = [
     animationSpeed: 'normal',
     enableReducedMotionFallback: true,
     deliveryPillBadge: 'Express Dispatch',
-    deliveryPillTime: '10 Mins'
+    deliveryPillTime: '10 Mins',
+    heroVisualType: 'default_lotus',
+    heroVisualCycleSeconds: 3.2,
+    enableFloatingPetals: true,
+    enableRotatingAura: true,
+    enableFlickeringDiyas: true
   }
 ];
 

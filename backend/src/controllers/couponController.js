@@ -17,12 +17,14 @@ export const getActiveCoupons = async (req, res, next) => {
     const now = new Date();
     const activeCoupons = await Coupon.find({
       isActive: true,
-      startDate: { $lte: now },
-      endDate: { $gte: now }
+      $or: [
+        { endDate: { $gte: now } },
+        { endDate: { $exists: false } }
+      ]
     })
       .select('code description discountType discountValue minOrderValue maxDiscountAmount endDate')
       .sort({ discountValue: -1 })
-      .limit(6);
+      .limit(20);
 
     res.json({ success: true, coupons: activeCoupons });
   } catch (error) {
@@ -83,10 +85,56 @@ export const createCoupon = async (req, res, next) => {
   try {
     const coupon = await Coupon.create({
       ...req.body,
-      code: req.body.code.toUpperCase()
+      code: req.body.code.trim().toUpperCase()
     });
     res.status(201).json({ success: true, coupon });
   } catch (error) {
     next(error);
   }
 };
+
+export const updateCoupon = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const updateData = { ...req.body };
+    if (updateData.code) {
+      updateData.code = updateData.code.trim().toUpperCase();
+    }
+    const coupon = await Coupon.findByIdAndUpdate(id, updateData, { new: true });
+    if (!coupon) {
+      return res.status(404).json({ success: false, message: 'Coupon not found' });
+    }
+    res.json({ success: true, coupon });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteCoupon = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const coupon = await Coupon.findByIdAndDelete(id);
+    if (!coupon) {
+      return res.status(404).json({ success: false, message: 'Coupon not found' });
+    }
+    res.json({ success: true, message: 'Coupon deleted successfully' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const toggleCouponStatus = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const coupon = await Coupon.findById(id);
+    if (!coupon) {
+      return res.status(404).json({ success: false, message: 'Coupon not found' });
+    }
+    coupon.isActive = !coupon.isActive;
+    await coupon.save();
+    res.json({ success: true, coupon });
+  } catch (error) {
+    next(error);
+  }
+};
+

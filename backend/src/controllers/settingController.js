@@ -15,7 +15,9 @@ export const getSettings = async (req, res, next) => {
       support_email: settingsMap['support_email'] || 'support@zuno.com',
       support_phone: settingsMap['support_phone'] || '+919876543210',
       serviceable_pincodes: settingsMap['serviceable_pincodes'] || ['110001', '110020', '110048', '560001', '560034', '400001', '400050'],
-      auto_dispatch_enabled: settingsMap['auto_dispatch_enabled'] !== undefined ? settingsMap['auto_dispatch_enabled'] : true
+      auto_dispatch_enabled: settingsMap['auto_dispatch_enabled'] !== undefined ? settingsMap['auto_dispatch_enabled'] : true,
+      delivery_eta_time: settingsMap['delivery_eta_time'] || '12 Mins',
+      delivery_eta_badge: settingsMap['delivery_eta_badge'] || 'Diwali Rush Express'
     };
 
     res.json({ success: true, settings: response });
