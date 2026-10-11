@@ -1,11 +1,12 @@
 import express from 'express';
-import { getCoupons, validateCoupon, createCoupon } from '../controllers/couponController.js';
+import { getCoupons, getActiveCoupons, validateCoupon, createCoupon } from '../controllers/couponController.js';
 import { protect, authorize } from '../middleware/auth.js';
 import { ROLES } from '../config/constants.js';
 
 const router = express.Router();
 
-// Public validation of coupon
+// Public: Used by customer promotional coupon strip & cart
+router.get('/active', getActiveCoupons);
 router.post('/validate', validateCoupon);
 
 // Admin management

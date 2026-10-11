@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import { Server } from 'socket.io';
 import app from './app.js';
 import { connectDB } from './config/db.js';
+import { seedPresetsIfEmpty } from './controllers/themeController.js';
 
 dotenv.config();
 
@@ -64,6 +65,7 @@ io.on('connection', (socket) => {
 const startServer = async () => {
   try {
     await connectDB();
+    await seedPresetsIfEmpty();
 
     server.listen(PORT, () => {
       console.log(`\n=================================================`);

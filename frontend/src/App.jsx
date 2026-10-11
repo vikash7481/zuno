@@ -43,6 +43,7 @@ import BusinessDelivery from './pages/business/BusinessDelivery';
 import AdminReports from './pages/admin/AdminReports';
 import BusinessStaff from './pages/business/BusinessStaff';
 import AdminSettings from './pages/admin/AdminSettings';
+import BusinessThemes from './pages/business/BusinessThemes';
 
 // Zuno Delivery Suite (Driver Partner App)
 import DeliveryLogin from './pages/delivery/DeliveryLogin';
@@ -315,6 +316,14 @@ export default function App() {
                     element={
                       <RequireBusinessRole allowedRoles={['super_admin', 'admin']}>
                         <AdminSettings />
+                      </RequireBusinessRole>
+                    }
+                  />
+                  <Route
+                    path="themes"
+                    element={
+                      <RequireBusinessRole allowedRoles={['super_admin', 'admin']}>
+                        <BusinessThemes />
                       </RequireBusinessRole>
                     }
                   />

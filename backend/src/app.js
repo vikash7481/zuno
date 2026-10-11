@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
 import mongoose from 'mongoose';
+import path from 'path';
 
 import authRoutes from './routes/authRoutes.js';
 import productRoutes from './routes/productRoutes.js';
@@ -17,10 +18,14 @@ import deliveryRoutes from './routes/deliveryRoutes.js';
 import reportRoutes from './routes/reportRoutes.js';
 import couponRoutes from './routes/couponRoutes.js';
 import settingRoutes from './routes/settingRoutes.js';
+import themeRoutes from './routes/themeRoutes.js';
 
 import { notFound, errorHandler } from './middleware/errorHandler.js';
 
 const app = express();
+
+// Serve uploaded theme media statically
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 // Security HTTP headers
 app.use(helmet({
@@ -113,6 +118,7 @@ app.use('/api/delivery', deliveryRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/coupons', couponRoutes);
 app.use('/api/settings', settingRoutes);
+app.use('/api/themes', themeRoutes);
 
 // Error handling middleware
 app.use(notFound);

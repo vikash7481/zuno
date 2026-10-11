@@ -21,7 +21,8 @@ import {
   Lock,
   ArrowRight,
   Truck,
-  CheckCircle2
+  CheckCircle2,
+  Palette
 } from 'lucide-react';
 
 export default function AdminLayout() {
@@ -36,6 +37,7 @@ export default function AdminLayout() {
   const getAllNavItems = () => {
     const items = [
       { name: 'Dashboard Overview', path: '/business/dashboard', icon: LayoutDashboard, roles: ['super_admin', 'admin'] },
+      { name: 'Theme Studio ✨', path: '/business/themes', icon: Palette, roles: ['super_admin', 'admin'] },
       { name: 'Products & Variants', path: '/business/products', icon: Package, roles: ['super_admin', 'admin'] },
       { name: 'Orders Management', path: '/business/orders', icon: ShoppingBag, roles: ['super_admin', 'admin', 'order_manager', 'delivery_manager'] },
       { name: 'Inventory & Stock', path: '/business/inventory', icon: Boxes, roles: ['super_admin', 'admin', 'inventory_manager', 'production_manager'] },

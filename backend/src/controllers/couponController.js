@@ -9,6 +9,27 @@ export const getCoupons = async (req, res, next) => {
   }
 };
 
+/**
+ * Public: Get active promotional coupons for customer header strip
+ */
+export const getActiveCoupons = async (req, res, next) => {
+  try {
+    const now = new Date();
+    const activeCoupons = await Coupon.find({
+      isActive: true,
+      startDate: { $lte: now },
+      endDate: { $gte: now }
+    })
+      .select('code description discountType discountValue minOrderValue maxDiscountAmount endDate')
+      .sort({ discountValue: -1 })
+      .limit(6);
+
+    res.json({ success: true, coupons: activeCoupons });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const validateCoupon = async (req, res, next) => {
   try {
     const { code, cartTotal } = req.body;
