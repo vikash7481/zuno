@@ -49,20 +49,37 @@ export default function Checkout() {
   // Razorpay sandbox simulation modal state
   const [razorpayModalData, setRazorpayModalData] = useState(null);
 
-  // Load saved address if user has default
+  // Load saved address or location selected from location picker
   useEffect(() => {
     if (user?.addresses?.length) {
       const def = user.addresses.find((a) => a.isDefault) || user.addresses[0];
-      setAddress({
-        fullName: def.fullName || user.name,
-        phone: def.phone || user.phone,
-        addressLine1: def.addressLine1,
-        addressLine2: def.addressLine2 || '',
-        city: def.city,
-        state: def.state,
-        pincode: def.pincode,
-        landmark: def.landmark || ''
-      });
+      setAddress((prev) => ({
+        ...prev,
+        fullName: def.fullName || user.name || prev.fullName,
+        phone: def.phone || user.phone || prev.phone,
+        addressLine1: def.addressLine1 || prev.addressLine1,
+        addressLine2: def.addressLine2 || prev.addressLine2,
+        city: def.city || prev.city,
+        state: def.state || prev.state,
+        pincode: def.pincode || prev.pincode,
+        landmark: def.landmark || prev.landmark
+      }));
+    } else {
+      const stored = localStorage.getItem('zuno_delivery_address');
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          setAddress((prev) => ({
+            ...prev,
+            addressLine1: parsed.street || parsed.displayName || prev.addressLine1,
+            city: parsed.city || prev.city,
+            state: parsed.state || prev.state,
+            pincode: parsed.pincode || prev.pincode
+          }));
+        } catch {
+          //
+        }
+      }
     }
   }, [user]);
 

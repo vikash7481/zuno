@@ -19,6 +19,7 @@ import {
   MapPin,
   Clock
 } from 'lucide-react';
+import DeliveryLocationModal from './DeliveryLocationModal';
 
 export default function Navbar() {
   const { user, isAuthenticated, logout, isRole } = useAuth();
@@ -30,7 +31,9 @@ export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
-  const [selectedLocation, setSelectedLocation] = useState('Bengaluru - 560001');
+  const [selectedLocation, setSelectedLocation] = useState(() => {
+    return localStorage.getItem('zuno_delivery_location') || 'Bengaluru - 560001';
+  });
   const [locationInput, setLocationInput] = useState('');
 
   // Animated search placeholder rotation (Zepto-style)
@@ -297,59 +300,19 @@ export default function Navbar() {
         </div>
       </header>
 
-      {/* Zepto-Style Delivery Location Modal */}
-      {isLocationModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-cream-300 space-y-4">
-            <div className="flex items-center justify-between border-b border-cream-200 pb-3">
-              <div className="flex items-center gap-2">
-                <MapPin className="w-5 h-5 text-qcPurple-700" />
-                <h3 className="font-bold text-base text-charcoal-950">Select Delivery Location</h3>
-              </div>
-              <button
-                onClick={() => setIsLocationModalOpen(false)}
-                className="p-1 rounded-full text-gray-400 hover:text-gray-700 hover:bg-cream-100"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <p className="text-xs text-gray-500">
-              Zuno delivers fresh, slow-roasted artisanal fox nuts to your doorstep within 10 to 15 minutes!
-            </p>
-
-            <div className="space-y-2">
-              {[
-                { name: 'Bengaluru - 560001', area: 'MG Road, Indiranagar, Koramangala' },
-                { name: 'Mumbai - 400001', area: 'Bandra, Fort, Colaba, Andheri' },
-                { name: 'Delhi NCR - 110001', area: 'Connaught Place, South Ex, Gurgaon' },
-                { name: 'Hyderabad - 500001', area: 'Banjara Hills, Hitec City, Jubilee Hills' }
-              ].map((loc) => (
-                <button
-                  key={loc.name}
-                  onClick={() => {
-                    setSelectedLocation(loc.name);
-                    setIsLocationModalOpen(false);
-                  }}
-                  className={`w-full p-3 rounded-2xl border text-left transition flex items-center justify-between ${
-                    selectedLocation === loc.name
-                      ? 'border-qcPurple-700 bg-qcPurple-50/60 ring-1 ring-qcPurple-700'
-                      : 'border-cream-300 hover:border-gray-400 bg-cream-50'
-                  }`}
-                >
-                  <div>
-                    <p className="font-bold text-xs text-charcoal-900">{loc.name}</p>
-                    <p className="text-[11px] text-gray-500">{loc.area}</p>
-                  </div>
-                  <span className="text-[10px] font-extrabold text-qcGreen-700 bg-qcGreen-100 px-2 py-0.5 rounded-full">
-                    ⚡ Express Delivery
-                  </span>
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Zepto-Style Real Delivery Location Modal */}
+      <DeliveryLocationModal
+        isOpen={isLocationModalOpen}
+        onClose={() => setIsLocationModalOpen(false)}
+        currentLocation={selectedLocation}
+        onLocationSelect={(newLoc, addressDetails) => {
+          setSelectedLocation(newLoc);
+          localStorage.setItem('zuno_delivery_location', newLoc);
+          if (addressDetails) {
+            localStorage.setItem('zuno_delivery_address', JSON.stringify(addressDetails));
+          }
+        }}
+      />
 
       {/* Mobile Drawer Menu */}
       {isMobileMenuOpen && (
