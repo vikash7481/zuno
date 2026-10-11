@@ -44,7 +44,7 @@ export default function ProductCard({ product }) {
     <div className="group relative bg-white rounded-2xl border border-cream-300 hover:border-qcGreen-500 hover:shadow-luxury transition-all duration-300 flex flex-col justify-between overflow-hidden p-3 h-full">
       {/* Top Image Container */}
       <div className="relative block aspect-square rounded-xl overflow-hidden bg-cream-100 mb-2.5">
-        <Link to={`/product/${product.slug}`} className="block w-full h-full">
+        <Link to={`/products/${product.slug || product._id}`} className="block w-full h-full">
           <img
             src={product.images?.[0] || 'https://images.unsplash.com/photo-1599599810769-bcde5a160d32?auto=format&fit=crop&w=600&q=80'}
             alt={product.name}
@@ -90,7 +90,7 @@ export default function ProductCard({ product }) {
           </div>
 
           {/* Product Name */}
-          <Link to={`/product/${product.slug}`} className="block">
+          <Link to={`/products/${product.slug || product._id}`} className="block">
             <h3 className="font-sans text-xs sm:text-sm font-bold text-charcoal-950 group-hover:text-qcGreen-700 transition line-clamp-2 leading-snug">
               {product.name}
             </h3>

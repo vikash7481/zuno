@@ -175,7 +175,7 @@ export default function App() {
 
                 {/* Backward compatibility redirects for customer storefront */}
                 <Route path="/catalogue" element={<Navigate to="/products" replace />} />
-                <Route path="/product/:slug" element={<Navigate to="/products/:slug" replace />} />
+                <Route path="/product/:slug" element={<ProductDetail />} />
                 <Route path="/profile" element={<Navigate to="/account" replace />} />
 
                 {/* ========================================= */}

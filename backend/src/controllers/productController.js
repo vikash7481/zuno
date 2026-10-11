@@ -103,7 +103,10 @@ export const getProducts = async (req, res, next) => {
 export const getProductBySlug = async (req, res, next) => {
   try {
     const { slug } = req.params;
-    const product = await Product.findOne({ slug })
+    const query = mongoose.Types.ObjectId.isValid(slug)
+      ? { $or: [{ slug }, { _id: slug }] }
+      : { slug };
+    const product = await Product.findOne(query)
       .populate('category', 'name slug')
       .lean();
 
