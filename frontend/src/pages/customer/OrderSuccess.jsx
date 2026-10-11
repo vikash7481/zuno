@@ -112,7 +112,7 @@ export default function OrderSuccess() {
           </Link>
 
           <Link
-            to="/catalogue"
+            to="/products"
             className="w-full sm:w-auto px-6 py-3 rounded-full bg-cream-200 hover:bg-cream-300 text-brand-900 border border-cream-400 text-xs font-bold transition text-center"
           >
             Continue Shopping

@@ -88,8 +88,8 @@ export default function ProductDetail() {
       <div className="max-w-7xl mx-auto px-4 py-20 text-center space-y-4">
         <h2 className="font-serif text-2xl font-bold text-brand-900">Product Not Found</h2>
         <p className="text-xs text-gray-500">The requested makhana flavour does not exist or has been archived.</p>
-        <Link to="/catalogue" className="inline-block px-6 py-2.5 bg-brand-700 text-white rounded-full text-xs font-bold">
-          Return to Catalogue
+        <Link to="/products" className="inline-block px-6 py-2.5 bg-brand-700 text-white rounded-full text-xs font-bold">
+          Return to Products
         </Link>
       </div>
     );
@@ -164,7 +164,7 @@ export default function ProductDetail() {
       <nav className="flex items-center gap-2 text-xs text-gray-500">
         <Link to="/" className="hover:text-brand-700">Home</Link>
         <ChevronRight className="w-3.5 h-3.5" />
-        <Link to="/catalogue" className="hover:text-brand-700">Catalogue</Link>
+        <Link to="/products" className="hover:text-brand-700">Products</Link>
         <ChevronRight className="w-3.5 h-3.5" />
         <span className="text-brand-900 font-semibold truncate">{product.name}</span>
       </nav>

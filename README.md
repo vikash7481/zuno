@@ -1,15 +1,15 @@
 # Zuno — Artisanal Fox Nuts E-Commerce & Production Management Platform
 
 > **Official Brand**: **Zuno**  
-> * Customer Shopping Experience: **Zuno** (`/`, `/catalogue`, `/checkout`)
-> * Enterprise Management Suite: **Zuno Business** (`/admin/*`)
-> * Driver Logistics Interface: **Zuno Delivery** (`/delivery`)
+> * Customer Shopping Experience: **Zuno** (`/`, `/products`, `/products/:slug`, `/cart`, `/checkout`, `/account`, `/orders`)
+> * Enterprise Management Suite: **Zuno Business** (`/business/login`, `/business/dashboard`, `/business/products`, `/business/orders`, `/business/inventory`, `/business/production`, `/business/delivery`, `/business/staff`)
+> * Driver Logistics Interface: **Zuno Delivery** (`/delivery/login`, `/delivery/dashboard`, `/delivery/orders/:id`)
 
 [![Node.js](https://img.shields.io/badge/Node.js-v18+-68a063.svg)](https://nodejs.org/)
-[![React](https://img.shields.io/badge/React-18-61dafb.svg)](https://react.dev/)
-[![MongoDB](https://img.shields.io/badge/MongoDB-8.0-47a248.svg)](https://www.mongodb.com/)
+[![React](https://img.shields.io/badge/React-19-61dafb.svg)](https://react.dev/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47a248.svg)](https://www.mongodb.com/)
 [![Tailwind CSS](https://img.shields.io/badge/TailwindCSS-v3.4-38bdf8.svg)](https://tailwindcss.com/)
-[![Jest Tests](https://img.shields.io/badge/Tests-12%20Passed-brightgreen.svg)]()
+[![Jest Tests](https://img.shields.io/badge/Tests-20%2F20%20Passed-brightgreen.svg)]()
 
 ---
 

@@ -25,10 +25,10 @@ export default function Wishlist() {
             Save your favourite roasted makhana flavours to easily reorder them whenever cravings hit.
           </p>
           <Link
-            to="/catalogue"
+            to="/products"
             className="inline-block px-6 py-2.5 rounded-full bg-brand-700 text-white text-xs font-bold shadow-sm"
           >
-            Explore Catalogue
+            Explore Makhana
           </Link>
         </div>
       ) : (

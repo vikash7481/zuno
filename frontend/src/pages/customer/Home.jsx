@@ -43,11 +43,11 @@ export default function Home() {
   const promoBanners = [
     {
       id: 1,
-      badge: '⚡ 10-MINUTE DISPATCH',
+      badge: '⚡ EXPRESS DISPATCH',
       title: 'Craving Artisanal Crunch?',
       subtitle: 'Slow-roasted jumbo fox nuts tossed in cold-pressed virgin olive oil.',
-      cta: 'Order in 10 Mins',
-      link: '/catalogue',
+      cta: 'Shop Fresh Roasts',
+      link: '/products',
       bgGradient: 'from-qcPurple-900 via-qcPurple-800 to-brand-800',
       badgeBg: 'bg-qcYellow-400 text-charcoal-950'
     },
@@ -57,7 +57,7 @@ export default function Home() {
       title: 'Flat ₹50 OFF Your First Snack',
       subtitle: 'Apply code ZUNO50 at checkout on orders above ₹299.',
       cta: 'Use Code ZUNO50',
-      link: '/catalogue',
+      link: '/products',
       bgGradient: 'from-brand-800 via-qcGreen-800 to-qcGreen-700',
       badgeBg: 'bg-white text-qcGreen-800'
     }
@@ -120,7 +120,7 @@ export default function Home() {
             <p className="text-xs text-gray-500 font-medium">Handcrafted single-origin lotus seeds</p>
           </div>
           <Link
-            to="/catalogue"
+            to="/products"
             className="text-xs font-black text-qcPurple-700 hover:text-qcPurple-900 flex items-center gap-1"
           >
             <span>See All</span>
@@ -134,7 +134,7 @@ export default function Home() {
             return (
               <Link
                 key={cat._id}
-                to={`/catalogue?category=${cat.slug}`}
+                to={`/products?category=${cat.slug}`}
                 className={`p-4 rounded-2xl border ${pastel.bg} ${pastel.border} transition-all duration-200 hover:-translate-y-1 hover:shadow-card text-center flex flex-col items-center justify-between space-y-2 group`}
               >
                 <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl overflow-hidden bg-white shadow-sm p-1 border border-cream-200 group-hover:scale-105 transition-transform">
@@ -149,7 +149,7 @@ export default function Home() {
                     {cat.name}
                   </h3>
                   <span className="text-[10px] font-bold text-gray-500 mt-0.5 block">
-                    ⚡ 10 Mins
+                    ⚡ Express
                   </span>
                 </div>
               </Link>
@@ -158,7 +158,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Zepto-Style Product Rail 1: Delivered in 10-15 Mins (Bestsellers) */}
+      {/* Product Rail: Handcrafted Bestsellers */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
         <div className="flex items-center justify-between border-b border-cream-200 pb-3">
           <div className="flex items-center gap-2">
@@ -167,13 +167,13 @@ export default function Home() {
             </div>
             <div>
               <h2 className="font-sans font-black text-lg sm:text-2xl text-charcoal-950 tracking-tight flex items-center gap-2">
-                <span>Delivered in 10-15 Mins</span>
+                <span>Handcrafted Bestsellers</span>
               </h2>
               <p className="text-xs text-gray-500 font-medium">Bestselling roasts freshly packed from our dark store</p>
             </div>
           </div>
           <Link
-            to="/catalogue"
+            to="/products"
             className="text-xs font-black text-qcPurple-700 hover:text-qcPurple-900 flex items-center gap-1"
           >
             <span>View All</span>

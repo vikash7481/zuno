@@ -113,6 +113,48 @@ export const verifyPayment = async (req, res, next) => {
   }
 };
 
+export const handlePaymentWebhook = async (req, res, next) => {
+  try {
+    const signature = req.headers['x-razorpay-signature'];
+    const secret = process.env.RAZORPAY_WEBHOOK_SECRET || process.env.RAZORPAY_KEY_SECRET;
+
+    // Verify webhook signature if in live mode
+    const isSandbox = process.env.PAYMENT_MODE === 'sandbox' || !process.env.RAZORPAY_KEY_SECRET;
+    if (!isSandbox && signature) {
+      const isValid = paymentService.verifyWebhookSignature(JSON.stringify(req.body), signature, secret);
+      if (!isValid) {
+        return res.status(400).json({ success: false, message: 'Invalid webhook signature' });
+      }
+    }
+
+    const event = req.body.event;
+    const paymentEntity = req.body.payload?.payment?.entity;
+
+    if (event === 'payment.captured' && paymentEntity) {
+      const orderId = paymentEntity.notes?.orderId;
+      if (orderId) {
+        const order = await Order.findById(orderId);
+        if (order && order.paymentStatus !== PAYMENT_STATUS.PAID) {
+          order.paymentStatus = PAYMENT_STATUS.PAID;
+          order.orderStatus = ORDER_STATUS.CONFIRMED;
+          order.paymentDetails.paidAt = new Date();
+          order.paymentDetails.razorpayPaymentId = paymentEntity.id;
+          order.statusHistory.push({
+            status: ORDER_STATUS.CONFIRMED,
+            updatedBy: 'Razorpay Webhook',
+            notes: `Payment captured via webhook: ${paymentEntity.id}`
+          });
+          await order.save();
+        }
+      }
+    }
+
+    res.json({ status: 'ok', received: true });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const getMyOrders = async (req, res, next) => {
   try {
     const page = parseInt(req.query.page, 10) || 1;
@@ -332,6 +374,41 @@ export const resendOrderOtp = async (req, res, next) => {
       message: 'OTP resent via simulated SMS & WhatsApp successfully',
       notifications
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const processRefund = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { amount, reason } = req.body;
+
+    const order = await Order.findById(id);
+    if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
+
+    if (order.paymentStatus !== PAYMENT_STATUS.PAID) {
+      return res.status(400).json({ success: false, message: 'Cannot refund an unpaid order' });
+    }
+
+    order.paymentStatus = PAYMENT_STATUS.REFUNDED;
+    order.statusHistory.push({
+      status: order.orderStatus,
+      updatedBy: req.user.name,
+      notes: `Refund processed: ₹${amount || order.totalAmount}. Reason: ${reason || 'Customer refund'}`
+    });
+    await order.save();
+
+    await logAudit({
+      action: 'ORDER_REFUNDED',
+      user: req.user,
+      entityType: 'Order',
+      entityId: order._id,
+      details: { amount: amount || order.totalAmount, reason },
+      req
+    });
+
+    res.json({ success: true, order, message: 'Refund successfully recorded' });
   } catch (error) {
     next(error);
   }

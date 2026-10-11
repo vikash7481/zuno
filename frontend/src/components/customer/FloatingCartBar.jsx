@@ -34,7 +34,7 @@ export default function FloatingCartBar() {
               </div>
               <p className="text-[11px] text-white/80 flex items-center gap-1 font-semibold">
                 <Zap className="w-3 h-3 fill-qcYellow-400 text-qcYellow-400" />
-                <span>Delivery in 10-15 mins</span>
+                <span>Express Artisanal Delivery</span>
               </p>
             </div>
           </div>

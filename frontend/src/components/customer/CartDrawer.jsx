@@ -40,7 +40,7 @@ export default function CartDrawer() {
               </div>
               <div>
                 <h2 className="font-sans font-black text-base text-charcoal-950 leading-tight">
-                  Delivery in 10-15 Mins
+                  Express Artisanal Delivery
                 </h2>
                 <p className="text-[11px] font-bold text-gray-500">
                   Shipment of {cartItems.length} {cartItems.length === 1 ? 'item' : 'items'}
@@ -92,11 +92,11 @@ export default function CartDrawer() {
                 <button
                   onClick={() => {
                     setIsDrawerOpen(false);
-                    navigate('/catalogue');
+                    navigate('/products');
                   }}
                   className="px-6 py-3 rounded-xl bg-qcGreen-700 hover:bg-qcGreen-800 text-white text-xs font-black transition shadow-sm uppercase tracking-wider"
                 >
-                  Explore 10-Min Snacks
+                  Explore Snacks
                 </button>
               </div>
             ) : (

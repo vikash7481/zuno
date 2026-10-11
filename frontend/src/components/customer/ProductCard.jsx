@@ -62,7 +62,7 @@ export default function ProductCard({ product }) {
           )}
           <span className="px-2 py-0.5 rounded-full bg-white/95 backdrop-blur-md text-charcoal-900 border border-cream-200 text-[10px] font-black flex items-center gap-1 shadow-sm">
             <Zap className="w-2.5 h-2.5 fill-qcYellow-400 text-qcYellow-500" />
-            <span>10 MINS</span>
+            <span>EXPRESS</span>
           </span>
         </div>
 
@@ -81,7 +81,7 @@ export default function ProductCard({ product }) {
           <div className="flex items-center justify-between text-[11px] mb-1">
             <span className="flex items-center gap-1 font-bold text-gray-500 tracking-wide">
               <Clock className="w-3 h-3 text-qcGreen-700" />
-              <span>10-15 MINS</span>
+              <span>FAST DISPATCH</span>
             </span>
             <div className="flex items-center gap-1 font-bold text-charcoal-800 bg-cream-100 px-1.5 py-0.5 rounded-md">
               <Star className="w-3 h-3 fill-gold-500 text-gold-500" />

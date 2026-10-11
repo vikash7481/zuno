@@ -46,7 +46,7 @@ export default function OrdersHistory() {
             Explore our slow-roasted Himalayan salt, spicy peri peri, and jaggery caramel flavours today.
           </p>
           <Link
-            to="/catalogue"
+            to="/products"
             className="inline-block px-6 py-2.5 rounded-full bg-brand-700 text-white text-xs font-bold shadow-sm"
           >
             Explore Makhana

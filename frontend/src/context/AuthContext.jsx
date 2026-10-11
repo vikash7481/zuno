@@ -69,20 +69,6 @@ export const AuthProvider = ({ children }) => {
     success('Logged out successfully');
   };
 
-  const quickLogin = async (roleName) => {
-    const roleEmails = {
-      customer: 'customer@zuno.com',
-      admin: 'admin@zuno.com',
-      superadmin: 'superadmin@zuno.com',
-      inventory: 'inventory@zuno.com',
-      production: 'production@zuno.com',
-      delivery: 'partner@zuno.com'
-    };
-
-    const targetEmail = roleEmails[roleName] || 'customer@zuno.com';
-    return await login(targetEmail, 'Password@123');
-  };
-
   const isRole = (roleToCheck) => {
     if (!user) return false;
     if (user.role === 'super_admin') return true; // Super admin possesses universal permissions
@@ -101,7 +87,6 @@ export const AuthProvider = ({ children }) => {
         login,
         register,
         logout,
-        quickLogin,
         isRole,
         setUser
       }}

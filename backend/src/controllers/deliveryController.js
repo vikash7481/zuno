@@ -24,6 +24,31 @@ export const getPartnerAssignments = async (req, res, next) => {
   }
 };
 
+export const getAssignmentById = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const assignment = await DeliveryAssignment.findById(id).populate('order');
+
+    if (!assignment) {
+      return res.status(404).json({ success: false, message: 'Delivery assignment not found' });
+    }
+
+    const isAssigned = String(assignment.partner) === String(req.user._id);
+    const isStaff = [ROLES.ADMIN, ROLES.SUPER_ADMIN, ROLES.DELIVERY_MANAGER].includes(req.user.role);
+
+    if (!isAssigned && !isStaff) {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied: You are not authorized to view this delivery assignment'
+      });
+    }
+
+    res.json({ success: true, assignment });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const updateAssignmentStatus = async (req, res, next) => {
   try {
     const { id } = req.params;

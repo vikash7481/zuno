@@ -4,17 +4,17 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import { NotificationProvider } from './context/NotificationContext';
 
-// Common
-import RoleSwitcherBanner from './components/common/RoleSwitcherBanner';
+// Customer Layout Elements
 import Navbar from './components/common/Navbar';
 import Footer from './components/common/Footer';
 import CartDrawer from './components/customer/CartDrawer';
 import FloatingCartBar from './components/customer/FloatingCartBar';
 
-// Customer Pages
+// Customer Storefront Pages (Zuno)
 import Home from './pages/customer/Home';
 import Catalogue from './pages/customer/Catalogue';
 import ProductDetail from './pages/customer/ProductDetail';
+import Cart from './pages/customer/Cart';
 import Checkout from './pages/customer/Checkout';
 import OrderSuccess from './pages/customer/OrderSuccess';
 import OrderDetail from './pages/customer/OrderDetail';
@@ -24,43 +24,92 @@ import Wishlist from './pages/customer/Wishlist';
 import BrandStory from './pages/customer/BrandStory';
 import Policies from './pages/customer/Policies';
 
-// Auth Pages
+// Customer Authentication
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 
-// Admin Suite (Zuno Business)
+// Zuno Business Suite (Admin & Operations)
+import BusinessLogin from './pages/business/BusinessLogin';
 import AdminLayout from './components/admin/AdminLayout';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminProducts from './pages/admin/AdminProducts';
 import AdminOrders from './pages/admin/AdminOrders';
 import AdminInventory from './pages/admin/AdminInventory';
-import AdminBatches from './pages/admin/AdminBatches';
 import AdminProduction from './pages/admin/AdminProduction';
 import AdminSuppliers from './pages/admin/AdminSuppliers';
 import AdminExpenses from './pages/admin/AdminExpenses';
+import BusinessDelivery from './pages/business/BusinessDelivery';
 import AdminReports from './pages/admin/AdminReports';
+import BusinessStaff from './pages/business/BusinessStaff';
 import AdminSettings from './pages/admin/AdminSettings';
 
-// Delivery Suite (Zuno Delivery)
+// Zuno Delivery Suite (Driver Partner App)
+import DeliveryLogin from './pages/delivery/DeliveryLogin';
 import DeliveryDashboard from './pages/delivery/DeliveryDashboard';
+import DeliveryOrderDetail from './pages/delivery/DeliveryOrderDetail';
 
-// Route Protection wrapper
-const RequireRole = ({ roles, children }) => {
+// Customer Route Protection
+const RequireCustomerAuth = ({ children }) => {
   const { user, loading, isAuthenticated } = useAuth();
   if (loading) return null;
   if (!isAuthenticated) return <Navigate to="/login" replace />;
-  if (user.role === 'super_admin') return children;
-  if (!roles.includes(user.role)) return <Navigate to="/" replace />;
+  return children;
+};
+
+// Business Suite Role Protection
+const RequireBusinessRole = ({ allowedRoles = [], children }) => {
+  const { user, loading, isAuthenticated } = useAuth();
+  if (loading) return null;
+  if (!isAuthenticated) return <Navigate to="/business/login" replace />;
+
+  const staffRoles = [
+    'super_admin',
+    'admin',
+    'inventory_manager',
+    'production_manager',
+    'order_manager',
+    'delivery_manager',
+    'support_staff'
+  ];
+
+  if (!staffRoles.includes(user.role)) {
+    return <Navigate to="/business/login" replace />;
+  }
+
+  if (allowedRoles.length && user.role !== 'super_admin' && !allowedRoles.includes(user.role)) {
+    // Redirect to permitted workspace
+    if (user.role === 'inventory_manager') return <Navigate to="/business/inventory" replace />;
+    if (user.role === 'production_manager') return <Navigate to="/business/production" replace />;
+    if (user.role === 'order_manager') return <Navigate to="/business/orders" replace />;
+    if (user.role === 'delivery_manager') return <Navigate to="/business/delivery" replace />;
+    return <Navigate to="/business/dashboard" replace />;
+  }
+
+  return children;
+};
+
+// Delivery Partner Route Protection
+const RequireDeliveryRole = ({ children }) => {
+  const { user, loading, isAuthenticated } = useAuth();
+  if (loading) return null;
+  if (!isAuthenticated) return <Navigate to="/delivery/login" replace />;
+  if (user.role !== 'delivery_partner' && user.role !== 'super_admin' && user.role !== 'delivery_manager') {
+    return <Navigate to="/delivery/login" replace />;
+  }
   return children;
 };
 
 // Customer Layout Wrapper
 function CustomerLayout({ children }) {
   const location = useLocation();
-  const isAdmin = location.pathname.startsWith('/admin');
+  const isBusiness =
+    location.pathname.startsWith('/business') ||
+    location.pathname.startsWith('/admin') ||
+    location.pathname.startsWith('/inventory') ||
+    location.pathname.startsWith('/production');
   const isDelivery = location.pathname.startsWith('/delivery');
 
-  if (isAdmin || isDelivery) {
+  if (isBusiness || isDelivery) {
     return children;
   }
 
@@ -81,58 +130,203 @@ export default function App() {
       <AuthProvider>
         <CartProvider>
           <Router>
-            {/* Top Demo Switcher across all interfaces */}
-            <RoleSwitcherBanner />
-
             <CustomerLayout>
               <Routes>
-                {/* Customer Storefront */}
+                {/* ========================================= */}
+                {/* 1. ZUNO — CUSTOMER SHOPPING APPLICATION   */}
+                {/* ========================================= */}
                 <Route path="/" element={<Home />} />
-                <Route path="/catalogue" element={<Catalogue />} />
-                <Route path="/product/:slug" element={<ProductDetail />} />
+                <Route path="/products" element={<Catalogue />} />
+                <Route path="/products/:slug" element={<ProductDetail />} />
+                <Route path="/cart" element={<Cart />} />
                 <Route path="/checkout" element={<Checkout />} />
                 <Route path="/order-success/:orderId" element={<OrderSuccess />} />
-                <Route path="/orders" element={<OrdersHistory />} />
-                <Route path="/orders/:id" element={<OrderDetail />} />
-                <Route path="/profile" element={<Profile />} />
+                <Route
+                  path="/account"
+                  element={
+                    <RequireCustomerAuth>
+                      <Profile />
+                    </RequireCustomerAuth>
+                  }
+                />
+                <Route
+                  path="/orders"
+                  element={
+                    <RequireCustomerAuth>
+                      <OrdersHistory />
+                    </RequireCustomerAuth>
+                  }
+                />
+                <Route
+                  path="/orders/:id"
+                  element={
+                    <RequireCustomerAuth>
+                      <OrderDetail />
+                    </RequireCustomerAuth>
+                  }
+                />
                 <Route path="/wishlist" element={<Wishlist />} />
                 <Route path="/our-story" element={<BrandStory />} />
                 <Route path="/policies" element={<Policies />} />
 
-                {/* Auth */}
+                {/* Customer Authentication */}
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
 
-                {/* Zuno Delivery (Partner) */}
+                {/* Backward compatibility redirects for customer storefront */}
+                <Route path="/catalogue" element={<Navigate to="/products" replace />} />
+                <Route path="/product/:slug" element={<Navigate to="/products/:slug" replace />} />
+                <Route path="/profile" element={<Navigate to="/account" replace />} />
+
+                {/* ========================================= */}
+                {/* 2. ZUNO DELIVERY — DRIVER PARTNER APP     */}
+                {/* ========================================= */}
+                <Route path="/delivery/login" element={<DeliveryLogin />} />
                 <Route
                   path="/delivery"
                   element={
-                    <RequireRole roles={['delivery_partner', 'admin', 'super_admin']}>
+                    <RequireDeliveryRole>
                       <DeliveryDashboard />
-                    </RequireRole>
+                    </RequireDeliveryRole>
+                  }
+                />
+                <Route
+                  path="/delivery/dashboard"
+                  element={
+                    <RequireDeliveryRole>
+                      <DeliveryDashboard />
+                    </RequireDeliveryRole>
+                  }
+                />
+                <Route
+                  path="/delivery/orders/:id"
+                  element={
+                    <RequireDeliveryRole>
+                      <DeliveryOrderDetail />
+                    </RequireDeliveryRole>
                   }
                 />
 
-                {/* Zuno Business (Admin) */}
+                {/* ========================================= */}
+                {/* 3. ZUNO BUSINESS — ENTERPRISE ADMIN SUITE */}
+                {/* ========================================= */}
+                <Route path="/business/login" element={<BusinessLogin />} />
                 <Route
-                  path="/admin"
+                  path="/business"
                   element={
-                    <RequireRole roles={['admin', 'super_admin', 'inventory_manager', 'production_manager', 'order_manager']}>
+                    <RequireBusinessRole>
                       <AdminLayout />
-                    </RequireRole>
+                    </RequireBusinessRole>
                   }
                 >
-                  <Route index element={<AdminDashboard />} />
-                  <Route path="products" element={<AdminProducts />} />
-                  <Route path="orders" element={<AdminOrders />} />
-                  <Route path="inventory" element={<AdminInventory />} />
-                  <Route path="batches" element={<AdminBatches />} />
-                  <Route path="production" element={<AdminProduction />} />
-                  <Route path="suppliers" element={<AdminSuppliers />} />
-                  <Route path="expenses" element={<AdminExpenses />} />
-                  <Route path="reports" element={<AdminReports />} />
-                  <Route path="settings" element={<AdminSettings />} />
+                  <Route index element={<Navigate to="/business/dashboard" replace />} />
+                  <Route
+                    path="dashboard"
+                    element={
+                      <RequireBusinessRole allowedRoles={['super_admin', 'admin']}>
+                        <AdminDashboard />
+                      </RequireBusinessRole>
+                    }
+                  />
+                  <Route
+                    path="products"
+                    element={
+                      <RequireBusinessRole allowedRoles={['super_admin', 'admin']}>
+                        <AdminProducts />
+                      </RequireBusinessRole>
+                    }
+                  />
+                  <Route
+                    path="orders"
+                    element={
+                      <RequireBusinessRole allowedRoles={['super_admin', 'admin', 'order_manager', 'delivery_manager']}>
+                        <AdminOrders />
+                      </RequireBusinessRole>
+                    }
+                  />
+                  <Route
+                    path="inventory"
+                    element={
+                      <RequireBusinessRole allowedRoles={['super_admin', 'admin', 'inventory_manager', 'production_manager']}>
+                        <AdminInventory />
+                      </RequireBusinessRole>
+                    }
+                  />
+                  <Route
+                    path="production"
+                    element={
+                      <RequireBusinessRole allowedRoles={['super_admin', 'admin', 'production_manager']}>
+                        <AdminProduction />
+                      </RequireBusinessRole>
+                    }
+                  />
+                  <Route
+                    path="suppliers"
+                    element={
+                      <RequireBusinessRole allowedRoles={['super_admin', 'admin', 'inventory_manager']}>
+                        <AdminSuppliers />
+                      </RequireBusinessRole>
+                    }
+                  />
+                  <Route
+                    path="purchases"
+                    element={
+                      <RequireBusinessRole allowedRoles={['super_admin', 'admin', 'inventory_manager']}>
+                        <AdminSuppliers />
+                      </RequireBusinessRole>
+                    }
+                  />
+                  <Route
+                    path="expenses"
+                    element={
+                      <RequireBusinessRole allowedRoles={['super_admin', 'admin']}>
+                        <AdminExpenses />
+                      </RequireBusinessRole>
+                    }
+                  />
+                  <Route
+                    path="delivery"
+                    element={
+                      <RequireBusinessRole allowedRoles={['super_admin', 'admin', 'delivery_manager', 'order_manager']}>
+                        <BusinessDelivery />
+                      </RequireBusinessRole>
+                    }
+                  />
+                  <Route
+                    path="reports"
+                    element={
+                      <RequireBusinessRole allowedRoles={['super_admin', 'admin']}>
+                        <AdminReports />
+                      </RequireBusinessRole>
+                    }
+                  />
+                  <Route
+                    path="staff"
+                    element={
+                      <RequireBusinessRole allowedRoles={['super_admin']}>
+                        <BusinessStaff />
+                      </RequireBusinessRole>
+                    }
+                  />
+                  <Route
+                    path="settings"
+                    element={
+                      <RequireBusinessRole allowedRoles={['super_admin', 'admin']}>
+                        <AdminSettings />
+                      </RequireBusinessRole>
+                    }
+                  />
                 </Route>
+
+                {/* Legacy /admin and /inventory /production redirects to /business */}
+                <Route path="/admin" element={<Navigate to="/business/dashboard" replace />} />
+                <Route path="/admin/*" element={<Navigate to="/business/dashboard" replace />} />
+                <Route path="/inventory" element={<Navigate to="/business/inventory" replace />} />
+                <Route path="/inventory/*" element={<Navigate to="/business/inventory" replace />} />
+                <Route path="/production" element={<Navigate to="/business/production" replace />} />
+                <Route path="/production/*" element={<Navigate to="/business/production" replace />} />
+                <Route path="/portals" element={<Navigate to="/business/login" replace />} />
+                <Route path="/portal" element={<Navigate to="/business/login" replace />} />
 
                 {/* Fallback */}
                 <Route path="*" element={<Navigate to="/" replace />} />

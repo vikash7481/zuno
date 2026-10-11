@@ -53,18 +53,18 @@ export default function Navbar() {
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      navigate(`/catalogue?search=${encodeURIComponent(searchQuery.trim())}`);
+      navigate(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
       setIsMobileMenuOpen(false);
     }
   };
 
   const navCategories = [
-    { name: 'All Makhana', path: '/catalogue' },
-    { name: '⚡ Classic Roasted', path: '/catalogue?category=classic-roasted' },
-    { name: '🌶️ Gourmet Spiced', path: '/catalogue?category=gourmet-flavoured' },
-    { name: '🍯 Sweet Delights', path: '/catalogue?category=sweet-delights' },
-    { name: '🌿 Raw Superfood', path: '/catalogue?category=raw-superfood' },
-    { name: '🎁 Family Packs', path: '/catalogue?category=combos-and-family-packs' }
+    { name: 'All Makhana', path: '/products' },
+    { name: '⚡ Classic Roasted', path: '/products?category=classic-roasted' },
+    { name: '🌶️ Gourmet Spiced', path: '/products?category=gourmet-flavoured' },
+    { name: '🍯 Sweet Delights', path: '/products?category=sweet-delights' },
+    { name: '🌿 Raw Superfood', path: '/products?category=raw-superfood' },
+    { name: '🎁 Family Packs', path: '/products?category=combos-and-family-packs' }
   ];
 
   return (
@@ -84,16 +84,16 @@ export default function Navbar() {
                     Zuno
                   </span>
                   <span className="text-[10px] uppercase font-black tracking-widest text-qcGreen-700 mt-0.5">
-                    10-Min Superfood
+                    Artisanal Superfood
                   </span>
                 </div>
               </Link>
 
-              {/* Zepto-Style 10-Minute Delivery Location Pill */}
+              {/* Express Delivery Location Pill */}
               <div className="hidden sm:flex flex-col text-left pl-3 sm:pl-4 border-l border-cream-300">
                 <div className="flex items-center gap-1.5 font-black text-xs text-charcoal-950">
-                  <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-qcYellow-400 text-charcoal-950 font-black text-[10px] shadow-2xs">
-                    <Zap className="w-2.5 h-2.5 fill-charcoal-950" /> 10 MINS
+                  <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-amber-400 text-charcoal-950 font-black text-[10px] shadow-2xs">
+                    <Zap className="w-2.5 h-2.5 fill-charcoal-950" /> Express Dispatch
                   </span>
                   <span className="text-[11px] font-bold text-gray-500">Delivery to</span>
                 </div>
@@ -167,7 +167,7 @@ export default function Navbar() {
                         </div>
 
                         <Link
-                          to="/profile"
+                          to="/account"
                           onClick={() => setIsProfileOpen(false)}
                           className="flex items-center gap-2.5 px-4 py-2 text-xs text-charcoal-800 hover:bg-cream-100 transition"
                         >
@@ -182,19 +182,39 @@ export default function Navbar() {
                           <PackageCheck className="w-4 h-4" /> My Orders & Invoices
                         </Link>
 
-                        {isRole(['admin', 'super_admin', 'inventory_manager', 'order_manager', 'production_manager']) && (
+                        {isRole(['admin', 'super_admin']) && (
                           <Link
-                            to="/admin"
+                            to="/business/dashboard"
                             onClick={() => setIsProfileOpen(false)}
-                            className="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-qcPurple-700 bg-qcPurple-50 hover:bg-qcPurple-100 transition"
+                            className="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 transition"
                           >
-                            <Shield className="w-4 h-4 text-qcPurple-700" /> Zuno Business Admin
+                            <Shield className="w-4 h-4 text-emerald-700" /> Zuno Business Admin
+                          </Link>
+                        )}
+
+                        {isRole(['inventory_manager']) && (
+                          <Link
+                            to="/business/inventory"
+                            onClick={() => setIsProfileOpen(false)}
+                            className="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-purple-800 bg-purple-50 hover:bg-purple-100 transition"
+                          >
+                            <Shield className="w-4 h-4 text-purple-700" /> Zuno Inventory Portal
+                          </Link>
+                        )}
+
+                        {isRole(['production_manager']) && (
+                          <Link
+                            to="/business/production"
+                            onClick={() => setIsProfileOpen(false)}
+                            className="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-blue-800 bg-blue-50 hover:bg-blue-100 transition"
+                          >
+                            <Shield className="w-4 h-4 text-blue-700" /> Zuno Production Suite
                           </Link>
                         )}
 
                         {isRole(['delivery_partner']) && (
                           <Link
-                            to="/delivery"
+                            to="/delivery/dashboard"
                             onClick={() => setIsProfileOpen(false)}
                             className="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-amber-700 bg-amber-50 hover:bg-amber-100 transition"
                           >
@@ -322,7 +342,7 @@ export default function Navbar() {
                     <p className="text-[11px] text-gray-500">{loc.area}</p>
                   </div>
                   <span className="text-[10px] font-extrabold text-qcGreen-700 bg-qcGreen-100 px-2 py-0.5 rounded-full">
-                    ⚡ 10 Mins
+                    ⚡ Express Delivery
                   </span>
                 </button>
               ))}

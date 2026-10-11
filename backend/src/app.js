@@ -3,6 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
+import mongoose from 'mongoose';
 
 import authRoutes from './routes/authRoutes.js';
 import productRoutes from './routes/productRoutes.js';
@@ -42,12 +43,11 @@ app.use(cors({
     if (!origin) return callback(null, true);
     if (
       allowedOrigins.includes(origin) ||
-      allowedOrigins.includes('*') ||
       origin.endsWith('.vercel.app')
     ) {
       return callback(null, true);
     }
-    return callback(null, true);
+    return callback(new Error(`Origin ${origin} not allowed by CORS`));
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
@@ -79,7 +79,7 @@ app.get('/', (req, res) => {
     message: 'Zuno Enterprise Artisanal Fox Nuts Platform API is running live',
     version: '1.0.0',
     status: 'healthy',
-    database: 'MongoDB Atlas Connected',
+    database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
     endpoints: {
       health: '/api/health',
       products: '/api/products',
@@ -90,9 +90,11 @@ app.get('/', (req, res) => {
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
+  const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
   res.json({
-    status: 'healthy',
+    status: dbStatus === 'connected' ? 'healthy' : 'degraded',
     brand: process.env.BRAND_NAME || 'Zuno',
+    database: dbStatus,
     uptime: Math.round(process.uptime()),
     timestamp: new Date().toISOString()
   });

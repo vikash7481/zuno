@@ -1,6 +1,7 @@
 import express from 'express';
 import {
   getPartnerAssignments,
+  getAssignmentById,
   updateAssignmentStatus,
   getAvailablePartners,
   togglePartnerAvailability
@@ -19,6 +20,12 @@ router.get(
   getPartnerAssignments
 );
 
+router.get(
+  '/assignments/:id',
+  authorize(ROLES.DELIVERY_PARTNER, ROLES.ADMIN, ROLES.SUPER_ADMIN, ROLES.DELIVERY_MANAGER),
+  getAssignmentById
+);
+
 router.post(
   '/assignments/:id/status',
   authorize(ROLES.DELIVERY_PARTNER),
@@ -31,7 +38,7 @@ router.post(
   togglePartnerAvailability
 );
 
-// Admin & Delivery Manager actions
+// Admin & Delivery Manager fleet management actions
 router.get(
   '/partners',
   authorize(ROLES.ADMIN, ROLES.SUPER_ADMIN, ROLES.DELIVERY_MANAGER),

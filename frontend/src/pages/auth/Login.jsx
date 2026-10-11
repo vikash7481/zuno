@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Sparkles, Shield, User, Truck, Factory, Boxes, ArrowRight, Lock, Mail } from 'lucide-react';
+import { Sparkles, Mail, Lock, ArrowRight, ShieldCheck } from 'lucide-react';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login, quickLogin } = useAuth();
+  const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -18,10 +18,14 @@ export default function Login() {
     setLoading(true);
     try {
       const user = await login(email, password);
-      if (['admin', 'super_admin', 'inventory_manager', 'production_manager'].includes(user.role)) {
-        navigate('/admin');
+      // If staff user logs in from customer login, route them to their workspace
+      if (['super_admin', 'admin', 'inventory_manager', 'production_manager', 'order_manager', 'delivery_manager'].includes(user.role)) {
+        if (user.role === 'inventory_manager') navigate('/business/inventory');
+        else if (user.role === 'production_manager') navigate('/business/production');
+        else if (user.role === 'order_manager') navigate('/business/orders');
+        else navigate('/business/dashboard');
       } else if (user.role === 'delivery_partner') {
-        navigate('/delivery');
+        navigate('/delivery/dashboard');
       } else {
         navigate(redirectPath);
       }
@@ -32,27 +36,15 @@ export default function Login() {
     }
   };
 
-  const handleQuickDemo = async (roleKey, target) => {
-    setLoading(true);
-    try {
-      await quickLogin(roleKey);
-      navigate(target);
-    } catch {
-      //
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <div className="max-w-md mx-auto px-4 py-16 space-y-6">
       {/* Brand Header */}
       <div className="text-center space-y-2">
-        <div className="w-12 h-12 rounded-full bg-brand-700 flex items-center justify-center text-gold-400 mx-auto shadow-md border border-gold-500/30">
+        <div className="w-12 h-12 rounded-2xl bg-brand-700 flex items-center justify-center text-gold-400 mx-auto shadow-md border border-gold-500/30">
           <Sparkles className="w-6 h-6" />
         </div>
         <h1 className="font-serif text-3xl font-bold text-brand-950">Welcome to Zuno</h1>
-        <p className="text-xs text-gray-500">Sign in to your customer account or role dashboard</p>
+        <p className="text-xs text-gray-500">Sign in to your customer account to manage your orders</p>
       </div>
 
       {/* Main Login Card */}
@@ -91,78 +83,35 @@ export default function Login() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 rounded-xl bg-brand-700 hover:bg-brand-800 text-white font-bold text-xs uppercase tracking-wider transition shadow-sm"
+            className="w-full py-3 rounded-xl bg-brand-700 hover:bg-brand-800 text-white font-bold text-xs uppercase tracking-wider transition shadow-sm flex items-center justify-center gap-2"
           >
-            {loading ? 'Authenticating...' : 'Sign In'}
+            <span>{loading ? 'Authenticating...' : 'Sign In'}</span>
+            <ArrowRight className="w-4 h-4" />
           </button>
         </form>
 
-        <p className="text-center text-xs text-gray-500">
-          Don’t have an account?{' '}
+        <div className="flex items-center justify-between text-xs text-gray-500 pt-2 border-t border-cream-200">
+          <span>Don't have an account?</span>
           <Link to="/register" className="text-brand-700 font-bold hover:underline">
-            Create Customer Account
+            Register Here
           </Link>
-        </p>
+        </div>
       </div>
 
-      {/* 1-Click Role-Based Quick Demo Access */}
-      <div className="p-5 rounded-2xl bg-cream-200/80 border border-cream-300 space-y-3">
-        <div className="text-center">
-          <span className="text-[10px] uppercase font-bold tracking-widest text-gold-700">
-            Developer & Evaluator Demo Logins
-          </span>
-          <p className="text-[11px] text-gray-500 mt-0.5">Click any role to log in with pre-configured seed accounts:</p>
-        </div>
-
-        <div className="grid grid-cols-2 gap-2 text-[11px]">
-          <button
-            onClick={() => handleQuickDemo('customer', '/')}
-            className="p-2.5 rounded-xl bg-white hover:bg-cream-100 border border-cream-300 font-bold text-charcoal-800 flex items-center justify-center gap-1.5 shadow-sm transition"
-          >
-            <User className="w-3.5 h-3.5 text-brand-700" />
-            <span>Customer (Priya)</span>
-          </button>
-
-          <button
-            onClick={() => handleQuickDemo('admin', '/admin')}
-            className="p-2.5 rounded-xl bg-white hover:bg-cream-100 border border-cream-300 font-bold text-charcoal-800 flex items-center justify-center gap-1.5 shadow-sm transition"
-          >
-            <Shield className="w-3.5 h-3.5 text-brand-700" />
-            <span>Admin (Rohan)</span>
-          </button>
-
-          <button
-            onClick={() => handleQuickDemo('delivery', '/delivery')}
-            className="p-2.5 rounded-xl bg-white hover:bg-cream-100 border border-cream-300 font-bold text-charcoal-800 flex items-center justify-center gap-1.5 shadow-sm transition"
-          >
-            <Truck className="w-3.5 h-3.5 text-amber-600" />
-            <span>Delivery (Rajesh)</span>
-          </button>
-
-          <button
-            onClick={() => handleQuickDemo('inventory', '/admin/inventory')}
-            className="p-2.5 rounded-xl bg-white hover:bg-cream-100 border border-cream-300 font-bold text-charcoal-800 flex items-center justify-center gap-1.5 shadow-sm transition"
-          >
-            <Boxes className="w-3.5 h-3.5 text-purple-600" />
-            <span>Inventory Mgr</span>
-          </button>
-
-          <button
-            onClick={() => handleQuickDemo('production', '/admin/production')}
-            className="p-2.5 rounded-xl bg-white hover:bg-cream-100 border border-cream-300 font-bold text-charcoal-800 flex items-center justify-center gap-1.5 shadow-sm transition"
-          >
-            <Factory className="w-3.5 h-3.5 text-blue-600" />
-            <span>Production Mgr</span>
-          </button>
-
-          <button
-            onClick={() => handleQuickDemo('superadmin', '/admin')}
-            className="p-2.5 rounded-xl bg-white hover:bg-cream-100 border border-cream-300 font-bold text-charcoal-800 flex items-center justify-center gap-1.5 shadow-sm transition"
-          >
-            <Shield className="w-3.5 h-3.5 text-gold-600" />
-            <span>Super Admin</span>
-          </button>
-        </div>
+      {/* Enterprise Staff Gateway Link */}
+      <div className="text-center space-y-1.5 text-xs text-gray-500">
+        <p>
+          Zuno Business staff?{' '}
+          <Link to="/business/login" className="text-brand-800 font-bold hover:underline">
+            Log in to Business Suite
+          </Link>
+        </p>
+        <p>
+          Delivery fleet partner?{' '}
+          <Link to="/delivery/login" className="text-amber-800 font-bold hover:underline">
+            Log in to Delivery App
+          </Link>
+        </p>
       </div>
     </div>
   );

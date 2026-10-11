@@ -1,3 +1,6 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
 import request from 'supertest';
 import mongoose from 'mongoose';
 import app from '../app.js';
@@ -5,15 +8,19 @@ import Recipe from '../models/Recipe.js';
 import ProductionBatch from '../models/ProductionBatch.js';
 import InventoryItem from '../models/InventoryItem.js';
 import Order from '../models/Order.js';
+import User from '../models/User.js';
+import DeliveryAssignment from '../models/DeliveryAssignment.js';
+import { ROLES } from '../config/constants.js';
 
-describe('Delivery Partner & Production Engine Tests', () => {
+describe('Delivery Partner & Production Engine Security Tests', () => {
   let adminToken = '';
   let partnerToken = '';
   let partnerId = '';
+  let partner2Token = '';
 
   beforeAll(async () => {
     const uri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/zuno_db';
-    if (mongoose.connection.readyState === 0) {
+    if (mongoose.connection.readyState !== 1) {
       await mongoose.connect(uri);
     }
 
@@ -27,14 +34,22 @@ describe('Delivery Partner & Production Engine Tests', () => {
       .send({ email: 'partner@zuno.com', password: 'Password@123' });
     partnerToken = partnerLogin.body.token;
     partnerId = partnerLogin.body.user.id;
-  });
 
-  afterAll(async () => {
-    await mongoose.connection.close();
-  });
+    // Create a second delivery partner for cross-partner assignment IDOR testing
+    const p2Email = `partner2_${Date.now()}@zuno.com`;
+    const p2User = await User.create({
+      name: 'Rival Delivery Partner',
+      email: p2Email,
+      password: 'Password@123',
+      role: ROLES.DELIVERY_PARTNER
+    });
+    const p2Login = await request(app)
+      .post('/api/auth/login')
+      .send({ email: p2Email, password: 'Password@123' });
+    partner2Token = p2Login.body.token;
+  }, 60000);
 
   test('Delivery Workflow: Admin assigns partner, Partner updates status and delivers with OTP', async () => {
-    // Find an active order or create one
     let order = await Order.findOne({ orderStatus: { $in: ['confirmed', 'ready_for_dispatch'] } });
 
     if (!order) {
@@ -52,7 +67,15 @@ describe('Delivery Partner & Production Engine Tests', () => {
     expect(assignRes.body.order.orderStatus).toBe('assigned');
     const assignmentId = assignRes.body.assignment._id;
 
-    // 2. Partner views assigned deliveries
+    // 2. Cross-Partner IDOR check: Partner 2 cannot view or update Partner 1 assignment
+    const idorRes = await request(app)
+      .get(`/api/delivery/assignments/${assignmentId}`)
+      .set('Authorization', `Bearer ${partner2Token}`);
+
+    expect(idorRes.statusCode).toBe(403);
+    expect(idorRes.body.success).toBe(false);
+
+    // 3. Partner 1 views assigned deliveries
     const partnerAssignmentsRes = await request(app)
       .get('/api/delivery/assignments?status=active')
       .set('Authorization', `Bearer ${partnerToken}`);
@@ -60,7 +83,7 @@ describe('Delivery Partner & Production Engine Tests', () => {
     expect(partnerAssignmentsRes.statusCode).toBe(200);
     expect(partnerAssignmentsRes.body.assignments.length).toBeGreaterThan(0);
 
-    // 3. Partner marks picked up
+    // 4. Partner 1 marks picked up
     const pickUpRes = await request(app)
       .post(`/api/delivery/assignments/${assignmentId}/status`)
       .set('Authorization', `Bearer ${partnerToken}`)
@@ -69,7 +92,7 @@ describe('Delivery Partner & Production Engine Tests', () => {
     expect(pickUpRes.statusCode).toBe(200);
     expect(pickUpRes.body.order.orderStatus).toBe('picked_up');
 
-    // 4. Partner tries to deliver with WRONG OTP -> should reject
+    // 5. Partner 1 delivers with WRONG OTP -> should reject
     const wrongOtpRes = await request(app)
       .post(`/api/delivery/assignments/${assignmentId}/status`)
       .set('Authorization', `Bearer ${partnerToken}`)
@@ -78,20 +101,26 @@ describe('Delivery Partner & Production Engine Tests', () => {
     expect(wrongOtpRes.statusCode).toBe(400);
     expect(wrongOtpRes.body.message).toContain('Invalid delivery OTP');
 
-    // 5. Partner delivers with correct OTP
+    // 6. Partner 1 delivers with correct OTP
     const correctOtp = assignRes.body.order.deliveryOtp;
     const deliverRes = await request(app)
       .post(`/api/delivery/assignments/${assignmentId}/status`)
       .set('Authorization', `Bearer ${partnerToken}`)
-      .send({ status: 'delivered', otpCode: correctOtp, notes: 'Handed directly to resident' });
+      .send({ status: 'delivered', otpCode: correctOtp, notes: 'Delivered directly to recipient' });
 
     expect(deliverRes.statusCode).toBe(200);
     expect(deliverRes.body.order.orderStatus).toBe('delivered');
-  });
+  }, 90000);
 
   test('Production Workflow: Plan batch, issue materials, complete with quality check', async () => {
     const recipe = await Recipe.findOne({ isActive: true });
     expect(recipe).toBeDefined();
+
+    // Ensure warehouse has sufficient test inventory
+    await InventoryItem.updateMany(
+      {},
+      { $inc: { physicalStock: 1000 } }
+    );
 
     // 1. Plan production batch
     const planRes = await request(app)
@@ -128,5 +157,5 @@ describe('Delivery Partner & Production Engine Tests', () => {
     expect(completeRes.statusCode).toBe(200);
     expect(completeRes.body.batch.status).toBe('completed');
     expect(completeRes.body.batch.finishedBatchNumber).toBeDefined();
-  });
+  }, 90000);
 });

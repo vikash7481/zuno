@@ -104,7 +104,7 @@ export default function Checkout() {
       <div className="max-w-2xl mx-auto px-4 py-20 text-center space-y-4">
         <h2 className="font-serif text-2xl font-bold text-brand-900">Your Bag is Empty</h2>
         <p className="text-xs text-gray-500">Please add snacks to your cart before proceeding to checkout.</p>
-        <Link to="/catalogue" className="inline-block px-6 py-2.5 bg-brand-700 text-white rounded-full text-xs font-bold">
+        <Link to="/products" className="inline-block px-6 py-2.5 bg-brand-700 text-white rounded-full text-xs font-bold">
           Explore Products
         </Link>
       </div>

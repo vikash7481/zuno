@@ -79,12 +79,12 @@ export default function Footer() {
           <div>
             <h4 className="text-xs font-bold uppercase tracking-widest text-gold-400 mb-4">Shop Collections</h4>
             <ul className="space-y-2.5 text-xs text-gray-300">
-              <li><Link to="/catalogue" className="hover:text-gold-300 transition">All Fox Nuts</Link></li>
-              <li><Link to="/catalogue?category=classic-roasted" className="hover:text-gold-300 transition">Classic Pink Salt</Link></li>
-              <li><Link to="/catalogue?category=gourmet-flavoured" className="hover:text-gold-300 transition">Spicy Peri Peri</Link></li>
-              <li><Link to="/catalogue?category=sweet-delights" className="hover:text-gold-300 transition">Jaggery Caramel</Link></li>
-              <li><Link to="/catalogue?category=raw-superfood" className="hover:text-gold-300 transition">Raw Jumbo Kernels</Link></li>
-              <li><Link to="/catalogue?category=combos-and-family-packs" className="hover:text-gold-300 transition">Gift & Combo Boxes</Link></li>
+              <li><Link to="/products" className="hover:text-gold-300 transition">All Fox Nuts</Link></li>
+              <li><Link to="/products?category=classic-roasted" className="hover:text-gold-300 transition">Classic Pink Salt</Link></li>
+              <li><Link to="/products?category=gourmet-flavoured" className="hover:text-gold-300 transition">Spicy Peri Peri</Link></li>
+              <li><Link to="/products?category=sweet-delights" className="hover:text-gold-300 transition">Jaggery Caramel</Link></li>
+              <li><Link to="/products?category=raw-superfood" className="hover:text-gold-300 transition">Raw Jumbo Kernels</Link></li>
+              <li><Link to="/products?category=combos-and-family-packs" className="hover:text-gold-300 transition">Gift & Combo Boxes</Link></li>
             </ul>
           </div>
 
@@ -128,6 +128,14 @@ export default function Footer() {
             <span>FSSAI Lic: 10026011000492</span>
             <span>•</span>
             <span>Made with pride in India</span>
+            <span>•</span>
+            <Link to="/business/login" className="text-gray-400 hover:text-gold-300 transition">
+              Zuno Business
+            </Link>
+            <span>•</span>
+            <Link to="/delivery/login" className="text-gray-400 hover:text-gold-300 transition">
+              Delivery Fleet
+            </Link>
           </div>
         </div>
       </div>
