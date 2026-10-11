@@ -2,6 +2,7 @@ import DeliveryAssignment from '../models/DeliveryAssignment.js';
 import Order from '../models/Order.js';
 import User from '../models/User.js';
 import { inventoryService } from './inventoryService.js';
+import { notificationService } from './notificationService.js';
 import { ORDER_STATUS, ROLES } from '../config/constants.js';
 
 export const deliveryService = {
@@ -154,6 +155,7 @@ export const deliveryService = {
     } else if (newStatus === 'out_for_delivery') {
       assignment.status = 'out_for_delivery';
       order.orderStatus = ORDER_STATUS.OUT_FOR_DELIVERY;
+      notificationService.notifyOutForDelivery(order, partner).catch(e => console.error('[Notification Error]', e));
     } else if (newStatus === 'delivered') {
       // Validate customer OTP verification code if provided or enforce it
       if (otpCode && otpCode.trim() !== order.deliveryOtp) {

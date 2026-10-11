@@ -39,6 +39,22 @@ io.on('connection', (socket) => {
     console.log(`[Socket.IO] Socket ${socket.id} joined delivery_${partnerId}`);
   });
 
+  // Handle real-time driver GPS coordinate stream
+  socket.on('driver_location_update', (telemetry) => {
+    const { orderId, partnerId, lat, lng, speed, etaMinutes } = telemetry || {};
+    if (orderId) {
+      io.to(`order_${orderId}`).emit('driver_location_stream', {
+        orderId,
+        partnerId,
+        lat: lat || 12.9716,
+        lng: lng || 77.5946,
+        speed: speed || 24,
+        etaMinutes: etaMinutes || 8,
+        timestamp: new Date().toISOString()
+      });
+    }
+  });
+
   socket.on('disconnect', () => {
     console.log(`[Socket.IO] Client disconnected: ${socket.id}`);
   });

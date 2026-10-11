@@ -9,7 +9,9 @@ import {
   getAllOrders,
   updateOrderStatus,
   assignDeliveryPartner,
-  autoAssignDeliveryPartner
+  autoAssignDeliveryPartner,
+  getOrderNotifications,
+  resendOrderOtp
 } from '../controllers/orderController.js';
 import { protect, authorize } from '../middleware/auth.js';
 import { ROLES } from '../config/constants.js';
@@ -25,6 +27,8 @@ router.post('/verify-payment', protect, verifyPayment);
 router.get('/my-orders', protect, getMyOrders);
 router.get('/:id', protect, getOrderById);
 router.post('/:id/cancel', protect, cancelOrder);
+router.get('/:id/notifications', protect, getOrderNotifications);
+router.post('/:id/resend-otp', protect, resendOrderOtp);
 
 // Admin & Staff order operations
 router.get(

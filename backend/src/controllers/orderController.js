@@ -2,6 +2,7 @@ import Order from '../models/Order.js';
 import { orderService } from '../services/orderService.js';
 import { paymentService } from '../services/paymentService.js';
 import { deliveryService } from '../services/deliveryService.js';
+import { notificationService } from '../services/notificationService.js';
 import { logAudit } from '../utils/auditLogger.js';
 import { ORDER_STATUS, PAYMENT_STATUS, VALID_ORDER_TRANSITIONS, ROLES } from '../config/constants.js';
 
@@ -51,6 +52,10 @@ export const createOrder = async (req, res, next) => {
       req
     });
 
+    if (order.orderStatus === ORDER_STATUS.CONFIRMED) {
+      notificationService.notifyOrderPlaced(order).catch(e => console.error('[Notification Error]', e));
+    }
+
     res.status(201).json({
       success: true,
       order,
@@ -88,6 +93,7 @@ export const verifyPayment = async (req, res, next) => {
         notes: `Payment verified (${verificationResult.mode} mode). Transaction ID: ${razorpayPaymentId}`
       });
       await order.save();
+      notificationService.notifyOrderPlaced(order).catch(e => console.error('[Notification Error]', e));
 
       await logAudit({
         action: 'PAYMENT_VERIFIED',
@@ -298,6 +304,34 @@ export const autoAssignDeliveryPartner = async (req, res, next) => {
     const { id } = req.params;
     const result = await deliveryService.autoAssign(id);
     res.json({ success: true, ...result });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getOrderNotifications = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const notifications = notificationService.getHistory(id);
+    res.json({ success: true, notifications });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const resendOrderOtp = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const order = await Order.findById(id).populate('deliveryPartner');
+    if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
+    
+    await notificationService.notifyOutForDelivery(order, order.deliveryPartner);
+    const notifications = notificationService.getHistory(id);
+    res.json({
+      success: true,
+      message: 'OTP resent via simulated SMS & WhatsApp successfully',
+      notifications
+    });
   } catch (error) {
     next(error);
   }

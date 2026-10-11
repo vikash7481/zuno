@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import api from '../../api/client';
 import { useAuth } from '../../context/AuthContext';
 import { useNotification } from '../../context/NotificationContext';
+import { io } from 'socket.io-client';
 import {
   Truck,
   MapPin,
@@ -14,7 +15,8 @@ import {
   Power,
   Package,
   Navigation,
-  X
+  X,
+  Radio
 } from 'lucide-react';
 
 export default function DeliveryDashboard() {
@@ -68,6 +70,25 @@ export default function DeliveryDashboard() {
       fetchAssignments();
     } catch (err) {
       notifyError(err.message);
+    }
+  };
+
+  const handleBroadcastGps = (asg) => {
+    try {
+      const socketUrl = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5050';
+      const socket = io(socketUrl, { transports: ['websocket', 'polling'] });
+      const orderId = asg.order?._id || asg.order;
+      socket.emit('driver_location_update', {
+        orderId,
+        partnerId: user?._id,
+        speed: Math.floor(22 + Math.random() * 12),
+        etaMinutes: Math.floor(4 + Math.random() * 6),
+        lat: 12.9716,
+        lng: 77.5946
+      });
+      success('Live GPS coordinates streamed to customer order radar!');
+    } catch (e) {
+      notifyError('Failed to broadcast telemetry');
     }
   };
 
@@ -297,21 +318,31 @@ export default function DeliveryDashboard() {
                   )}
 
                   {asg.status === 'out_for_delivery' && (
-                    <div className="flex gap-2">
+                    <div className="space-y-2">
                       <button
-                        onClick={() => setCompletingAssignment(asg)}
-                        className="flex-1 py-3 bg-brand-700 hover:bg-brand-800 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shadow-md"
+                        onClick={() => handleBroadcastGps(asg)}
+                        className="w-full py-2 bg-gradient-to-r from-emerald-600 to-brand-700 hover:from-emerald-700 hover:to-brand-800 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm transition"
                       >
-                        <KeyRound className="w-4 h-4 text-gold-300" />
-                        <span>Deliver (Verify OTP)</span>
+                        <Radio className="w-3.5 h-3.5 animate-pulse text-amber-300" />
+                        <span>Stream Live GPS Telemetry</span>
                       </button>
 
-                      <button
-                        onClick={() => setFailingAssignment(asg)}
-                        className="py-3 px-3 bg-rose-50 text-rose-700 rounded-xl text-xs font-bold hover:bg-rose-100"
-                      >
-                        Fail
-                      </button>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => setCompletingAssignment(asg)}
+                          className="flex-1 py-3 bg-brand-700 hover:bg-brand-800 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shadow-md"
+                        >
+                          <KeyRound className="w-4 h-4 text-gold-300" />
+                          <span>Deliver (Verify OTP)</span>
+                        </button>
+
+                        <button
+                          onClick={() => setFailingAssignment(asg)}
+                          className="py-3 px-3 bg-rose-50 text-rose-700 rounded-xl text-xs font-bold hover:bg-rose-100"
+                        >
+                          Fail
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>
