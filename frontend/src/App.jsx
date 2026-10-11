@@ -23,6 +23,7 @@ import Profile from './pages/customer/Profile';
 import Wishlist from './pages/customer/Wishlist';
 import BrandStory from './pages/customer/BrandStory';
 import Policies from './pages/customer/Policies';
+import AppIntroSplash from './components/common/AppIntroSplash';
 
 // Customer Authentication
 import Login from './pages/auth/Login';
@@ -115,6 +116,7 @@ function CustomerLayout({ children }) {
 
   return (
     <div className="min-h-screen flex flex-col bg-cream-100 text-charcoal-900 pb-16">
+      <AppIntroSplash />
       <Navbar />
       <CartDrawer />
       <FloatingCartBar />

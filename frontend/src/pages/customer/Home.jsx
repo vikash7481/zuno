@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../../api/client';
 import ProductCard from '../../components/customer/ProductCard';
+import ProductCardSkeleton from '../../components/common/ProductCardSkeleton';
 import {
   Zap,
   Flame,
@@ -183,8 +184,8 @@ export default function Home() {
 
         {loading ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-            {[1, 2, 3, 4].map((n) => (
-              <div key={n} className="h-72 bg-cream-200/70 rounded-2xl animate-pulse" />
+            {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
+              <ProductCardSkeleton key={n} />
             ))}
           </div>
         ) : (
@@ -204,7 +205,7 @@ export default function Home() {
               <Zap className="w-5 h-5 fill-qcYellow-500" />
             </div>
             <div>
-              <h3 className="font-extrabold text-xs text-charcoal-950">10-Min Delivery</h3>
+              <h3 className="font-extrabold text-xs text-charcoal-950">Express Delivery</h3>
               <p className="text-[11px] text-gray-500 font-medium">Instant hyper-local dispatch</p>
             </div>
           </div>

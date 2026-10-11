@@ -5,6 +5,7 @@ import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
 import { useNotification } from '../../context/NotificationContext';
 import ProductCard from '../../components/customer/ProductCard';
+import ProductDetailSkeleton from '../../components/common/ProductDetailSkeleton';
 import {
   Star,
   ShoppingBag,
@@ -69,18 +70,7 @@ export default function ProductDetail() {
   }, [slug]);
 
   if (loading) {
-    return (
-      <div className="max-w-7xl mx-auto px-4 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-          <div className="aspect-square bg-cream-200/60 rounded-3xl animate-pulse" />
-          <div className="space-y-4">
-            <div className="h-8 bg-cream-200/60 rounded-lg w-3/4 animate-pulse" />
-            <div className="h-5 bg-cream-200/60 rounded-lg w-1/4 animate-pulse" />
-            <div className="h-24 bg-cream-200/60 rounded-lg animate-pulse" />
-          </div>
-        </div>
-      </div>
-    );
+    return <ProductDetailSkeleton />;
   }
 
   if (!product) {

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import api from '../../api/client';
 import ProductCard from '../../components/customer/ProductCard';
+import ProductCardSkeleton from '../../components/common/ProductCardSkeleton';
 import { Filter, SlidersHorizontal, Search, X, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export default function Catalogue() {
@@ -183,7 +184,7 @@ export default function Catalogue() {
       {loading ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
           {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
-            <div key={n} className="h-72 bg-cream-200/60 rounded-2xl animate-pulse" />
+            <ProductCardSkeleton key={n} />
           ))}
         </div>
       ) : products.length === 0 ? (
